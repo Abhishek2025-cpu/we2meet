@@ -18,7 +18,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'public', 'uploads')));
-app.use("/api/v1/user", require("./routes/userRoutes"))
+app.use("/api/user", require("./routes/userRoutes"))
+app.use("/api/interset", require("./routes/invitationRoutes"))
 
 app.get("/", (req, res) => {
   res.json({
