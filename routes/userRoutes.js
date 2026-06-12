@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser } = require('../controllers/userController');
+const { registerUser,loginUser, getAllUsers, getUserById } = require('../controllers/userController');
 const upload = require('../middlewares/upload'); 
+const authMiddleware = require('../middlewares/authMiddleware');
 
 
 router.post('/register', upload.fields([
@@ -9,5 +10,7 @@ router.post('/register', upload.fields([
     { name: 'gallery', maxCount: 5 }
 ]), registerUser);
 
-
+router.post("/login", loginUser);
+router.get("/get-all", authMiddleware, getAllUsers);
+router.get("/get-by-id/:id", authMiddleware, getUserById);
 module.exports = router;
