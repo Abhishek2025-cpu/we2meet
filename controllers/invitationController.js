@@ -170,3 +170,43 @@ exports.rejectInvite = async (req, res) => {
         });
     }
 };
+
+exports.getPendingReceivedInvites = async (req, res) => {
+    try {
+        const receiverId = req.user._id;
+        const invitations = await Invitation.find({
+            receiver: receiverId,
+            status: 'pending'
+        }).populate('sender');
+
+        res.status(200).json({
+            success: true,
+            data: invitations
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+exports.getAcceptedReceivedInvites = async (req, res) => {
+    try {
+        const receiverId = req.user._id;
+        const invitations = await Invitation.find({
+            receiver: receiverId,
+            status: 'accepted'
+        }).populate('sender');
+
+        res.status(200).json({
+            success: true,
+            data: invitations
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
