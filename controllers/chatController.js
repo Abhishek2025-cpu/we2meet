@@ -1,5 +1,6 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
+const mongoose = require("mongoose");
 
 exports.createConversation = async (req, res) => {
   try {
@@ -38,26 +39,7 @@ exports.createConversation = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const senderId = req.user.id;
-    const { conversationId, receiverId } = req.body;
-
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "File is required",
-      });
-    }
-
-    const fileUrl = `/uploads/${req.file.filename}`;
-
-    let fileType = "file";
-
-    const mime = req.file.mimetype;
-
-    if (mime.startsWith("image/")) {
-      fileType = "image";
-    } else if (mime.startsWith("video/")) {
-      fileType = "video";
-    }
+    const { conversationId, receiverId, text } = req.body;
 
     if (!conversationId || !receiverId) {
       return res.status(400).json({
@@ -66,17 +48,34 @@ exports.sendMessage = async (req, res) => {
       });
     }
 
+    if (!req.files?.length && !text) {
+      return res.status(400).json({
+        success: false,
+        message: "Message or file required",
+      });
+    }
+
+    let files = [];
+
+    if (req.files?.length) {
+      files = req.files.map(
+        (file) => `${process.env.BASE_URL}/uploads/${file.filename}`
+      );
+    }
+
     const message = await Message.create({
       conversationId,
       senderId,
       receiverId,
-      fileUrl,
-      fileType,
+      text: text || "",
+      file: files,
+      isDeleted: false,
+      readBy: [],
     });
 
     await Conversation.findByIdAndUpdate(conversationId, {
       lastMessage: {
-        text: fileType,
+        text: text?.trim() ? text : (files.length ? "media" : ""),
         senderId,
         createdAt: new Date(),
       },
@@ -93,6 +92,7 @@ exports.sendMessage = async (req, res) => {
     });
   }
 };
+
 exports.getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
@@ -121,7 +121,7 @@ exports.getConversations = async (req, res) => {
     const conversations = await Conversation.find({
       participants: userId,
     })
-      .populate("participants", "legalName photos.primaryPhoto")
+      .populate("participants", "legalName")
       .sort({ updatedAt: -1 });
 
     res.status(200).json({
@@ -138,11 +138,18 @@ exports.getConversations = async (req, res) => {
 
 exports.editMessage = async (req, res) => {
   try {
-    const { messageId, newFileUrl } = req.body;
+    const { messageId, newText } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid messageId",
+      });
+    }
 
     const message = await Message.findById(messageId);
 
-    if (!message) {
+    if (!message || message.isDeleted) {
       return res.status(404).json({
         success: false,
         message: "Message not found",
@@ -156,8 +163,8 @@ exports.editMessage = async (req, res) => {
       });
     }
 
-    if (newFileUrl) {
-      message.fileUrl = newFileUrl;
+    if (newText) {
+      message.text = newText;
     }
 
     await message.save();
@@ -178,6 +185,13 @@ exports.deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.body;
 
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid messageId",
+      });
+    }
+
     const message = await Message.findById(messageId);
 
     if (!message) {
@@ -195,12 +209,14 @@ exports.deleteMessage = async (req, res) => {
     }
 
     message.isDeleted = true;
-    message.fileUrl = "";
+    message.file = [];
+    message.deletedAt = new Date();
+
     await message.save();
 
     res.status(200).json({
       success: true,
-      message: "Message deleted",
+      message: "Message deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -220,12 +236,51 @@ exports.clearChat = async (req, res) => {
         conversationId,
         $or: [{ senderId: userId }, { receiverId: userId }],
       },
-      { isDeleted: true, fileUrl: "" }
+      {
+        isDeleted: true,
+        file: [],
+        deletedAt: new Date(),
+      }
     );
 
     res.status(200).json({
       success: true,
       message: "Chat cleared",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.markAsRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { conversationId } = req.body;
+
+    if (!conversationId) {
+      return res.status(400).json({
+        success: false,
+        message: "conversationId required",
+      });
+    }
+
+    await Message.updateMany(
+      {
+        conversationId,
+        senderId: { $ne: userId },
+        readBy: { $ne: userId },
+      },
+      {
+        $addToSet: { readBy: userId },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Marked as read",
     });
   } catch (error) {
     res.status(500).json({
@@ -246,7 +301,7 @@ exports.getUnreadCount = async (req, res) => {
     let totalUnread = 0;
 
     conversations.forEach((conv) => {
-      totalUnread += (conv.unreadCount && conv.unreadCount.get(userId)) || 0;
+      totalUnread += (conv.unreadCount?.get(userId)) || 0;
     });
 
     res.status(200).json({

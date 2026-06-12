@@ -20,17 +20,14 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
 
-    fileUrl: {
-      type: String,
-      required: true,
+    text:{
+        type:String,
     },
 
-    fileType: {
+    file:[ {
       type: String,
-      enum: ["image", "video", "file"],
-      default: "image",
-    },
-
+    }],
+    
     readBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
