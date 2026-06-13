@@ -66,9 +66,9 @@ const safeJsonParse = (data) => {
 
 exports.registerUser = async (req, res) => {
     try {
-        const { legalName, email, mobile, password } = req.body;
+        const { legalName, email, mobile, password, gender } = req.body;
 
-        if (!legalName || !email || !mobile || !password) {
+        if (!legalName || !email || !mobile || !password || !gender) {
             return res.status(400).json({ success: false, message: "Required fields are missing" });
         }
 
@@ -85,6 +85,7 @@ exports.registerUser = async (req, res) => {
             email,
             mobile,
             password: hashedPassword,
+            gender,
             profileCompleted: false,
             profileCompletionPercentage: 0
         });
