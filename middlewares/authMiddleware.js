@@ -23,12 +23,24 @@ const authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.error("Token verification error:", error.message);
         res.status(401).json({
             success: false,
             message: "Token is not valid or expired"
         });
     }
 };
+
+const adminMiddleware = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({
+            success: false,
+            message: "Access denied. Admin authorization required"
+        });
+    }
+};
+
+authMiddleware.adminMiddleware = adminMiddleware;
 
 module.exports = authMiddleware;

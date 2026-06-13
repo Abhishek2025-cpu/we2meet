@@ -19,9 +19,11 @@ app.use(morgan("dev"));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use("/api/user", require("./routes/userRoutes"))
-app.use("/api/interset", require("./routes/invitationRoutes"))
+app.use("/api/user", require("./routes/userRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes")); 
+app.use("/api/interset", require("./routes/invitationRoutes"));
 app.use("/api/profile", require("./routes/profileDetailRoutes"));
+app.use("/api/subscription", require("./routes/subscriptionRoutes"));
 
 app.get("/", (req, res) => {
   res.json({
