@@ -19,6 +19,8 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'public', 'uploads')));
 app.use("/api/v1/user", require("./routes/userRoutes"))
+const matchRoutes = require("./routes/matchRoutes");
+app.use("/api/matches", matchRoutes);
 
 app.get("/", (req, res) => {
   res.json({
