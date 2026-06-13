@@ -6,9 +6,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path"); 
 
-
 const connectDB = require("./config/db");
-
 
 const app = express();
 
@@ -17,9 +15,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
-app.use('/uploads', express.static(path.resolve(process.cwd(), 'public', 'uploads')));
+
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use("/api/user", require("./routes/userRoutes"))
 app.use("/api/interset", require("./routes/invitationRoutes"))
+app.use("/api/profile", require("./routes/profileDetailRoutes"));
 
 app.get("/", (req, res) => {
   res.json({
@@ -27,10 +29,6 @@ app.get("/", (req, res) => {
     message: "API Running"
   });
 });
-
-
-
-
 
 const PORT = process.env.PORT || 5000;
 
