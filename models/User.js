@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     profileCreatedFor: { type: String },
     legalName: { type: String, required: true },
     gender: { type: String, enum: ['Male', 'Female', 'Other'] },
-    dateOfBirth: { type: Date, required: true },
+    dateOfBirth: { type: Date },
     religion: { type: String },
     caste: { type: String }, 
     motherTongue: { type: String },
@@ -71,15 +71,15 @@ const userSchema = new mongoose.Schema({
     horoscope: {
         placeOfBirth: { type: String },
         timeOfBirth: { type: String },
-         dateOfBirth: Date,
+        dateOfBirth: Date,
         gothra: { type: String },
         manglikStatus: { type: String }
     },
 
     profileCompletionPercentage: { type: Number, default: 0 },
-     profileCompleted: {
-      type: Boolean,
-      default: false,
+    profileCompleted: {
+        type: Boolean,
+        default: false,
     },
 
     isTermsAccepted: { type: Boolean, default: false },
