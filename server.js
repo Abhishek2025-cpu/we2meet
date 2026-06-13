@@ -30,6 +30,7 @@ app.use(
 app.use("/api/v1/user", require("./routes/userRoutes"));
 app.use("/api/v1/interset", require("./routes/invitationRoutes"));
 app.use("/api/v1/chat", require("./routes/chatRoutes"));
+app.use("/api/v1/home", require("./routes/homeRoutes"));
 
 app.get("/", (req, res) => {
   res.json({
