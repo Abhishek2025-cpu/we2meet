@@ -13,8 +13,8 @@ const {
   markAsRead
 } = require("../controllers/chatController");
 
-const upload = require("../middlewares/upload");
-const authMiddleware = require("../middlewares/authMiddleware");
+const upload = require("../middleware/upload");
+const authMiddleware = require("../middleware/auth.middleware");
 
 router.post("/conversation", authMiddleware, createConversation);
 
