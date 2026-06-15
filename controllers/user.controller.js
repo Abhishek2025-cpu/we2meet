@@ -68,56 +68,56 @@ const kundaliPhotos =
       `${process.env.BASE_URL}/uploads/kundali/${file.filename}`
   ) || [];
 
-    const user = await User.create({
-      createdFor,
-      legalName,
-      email,
-      phone,
-      password: hashPassword,
-      gender,
-      dob,
-      religion,
-      caste,
-      subCaste,
-      motherTongue,
-      qualification,
-      college,
-      workingWith,
-      profession,
-      annualIncome,
+   const user = await User.create({
+  createdFor,
+  legalName,
+  email,
+  phone,
+  password: hashPassword,
+  gender,
+  dob,
+  religion,
+  caste,
+  subCaste,
+  motherTongue,
+  qualification,
+  college,
+  workingWith,
+  profession,
+  annualIncome,
 
-      profiles: profiles
-        ? JSON.parse(profiles)
-        : [],
+  profiles: profiles
+    ? JSON.parse(profiles)
+    : [],
 
-      familyDetails: familyDetails
-        ? JSON.parse(familyDetails)
-        : {},
+  familyDetails: familyDetails
+    ? JSON.parse(familyDetails)
+    : {},
 
-      partnerPreference: partnerPreference
-        ? JSON.parse(partnerPreference)
-        : {},
+  partnerPreference: partnerPreference
+    ? JSON.parse(partnerPreference)
+    : {},
 
-      lifeStyleDetails: lifeStyleDetails
-        ? JSON.parse(lifeStyleDetails)
-        : {},
+  lifeStyleDetails: lifeStyleDetails
+    ? JSON.parse(lifeStyleDetails)
+    : {},
 
-      myStory: myStory
-        ? JSON.parse(myStory)
-        : {},
+  myStory: myStory
+    ? JSON.parse(myStory)
+    : {},
 
-      kundaliDetails: {
-        ...(kundaliDetails
-          ? JSON.parse(kundaliDetails)
-          : {}),
-        kundaliPhoto
-      },
+  kundaliDetails: {
+    ...(kundaliDetails
+      ? JSON.parse(kundaliDetails)
+      : {}),
+    kundaliPhotos
+  },
 
-      profilePhoto,
+  profilePhotos,
 
-      freeUsedCount: 0,
-      maxFreeLimit: 5
-    });
+  freeUsedCount: 0,
+  maxFreeLimit: 5
+});
 
     user.profileCompletionPercentage =
       calculateProfileCompletion(user);
