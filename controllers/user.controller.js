@@ -56,18 +56,17 @@ exports.createUser = async (req, res) => {
       10
     );
 
-  let profilePhoto = null;
-let kundaliPhoto = null;
+const profilePhotos =
+  req.files?.profilePhoto?.map(
+    file =>
+      `${process.env.BASE_URL}/uploads/profile/${file.filename}`
+  ) || [];
 
-if (req.files?.profilePhoto?.[0]) {
-  profilePhoto =
-    `${process.env.BASE_URL}/uploads/profile/${req.files.profilePhoto[0].filename}`;
-}
-
-if (req.files?.kundaliPhoto?.[0]) {
-  kundaliPhoto =
-    `${process.env.BASE_URL}/uploads/profile/${req.files.kundaliPhoto[0].filename}`;
-}
+const kundaliPhotos =
+  req.files?.kundaliPhoto?.map(
+    file =>
+      `${process.env.BASE_URL}/uploads/kundali/${file.filename}`
+  ) || [];
 
     const user = await User.create({
       createdFor,

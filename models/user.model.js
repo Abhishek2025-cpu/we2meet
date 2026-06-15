@@ -103,10 +103,18 @@ const UserSchema = new mongoose.Schema(
       pob: String,
       gotra: String,
       manglik: Boolean,
-      kundaliPhoto: String
+       kundaliPhotos: [
+    {
+      type: String
+    }
+  ]
     },
 
-    profilePhoto: String,
+ profilePhotos: [
+  {
+    type: String
+  }
+],
 
     profileCompletionPercentage: {
       type: Number,
