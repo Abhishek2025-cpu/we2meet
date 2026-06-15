@@ -153,8 +153,7 @@ const kundaliPhotos =
 
 exports.login = async (req, res) => {
   try {
-    const { identifier, password } =
-      req.body;
+    const { identifier, password } = req.body;
 
     const user = await User.findOne({
       $or: [
@@ -182,18 +181,21 @@ exports.login = async (req, res) => {
       });
     }
 
-    user.profileCompletionPercentage =
-      calculateProfileCompletion(user);
-
-    await user.save();
-
     const token = generateToken(user._id);
+
+    const userObj = user.toObject();
+
+    delete userObj.password;
 
     res.json({
       success: true,
       message: "Login successful",
       token,
-      data: user
+      data: {
+        ...userObj,
+        profileCompletionPercentage:
+          calculateProfileCompletion(user)
+      }
     });
   } catch (error) {
     res.status(500).json({
