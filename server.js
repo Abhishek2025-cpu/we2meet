@@ -28,8 +28,6 @@ app.use(
   require("./routes/user.routes")
 );
 
-app.use("/api/invitations", require("./routes/invitationRoutes"));
-app.use("/api/profile", require("./routes/profileDetailRoutes"));
 
 app.get("/", (req, res) => {
   res.json({
