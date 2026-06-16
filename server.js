@@ -22,6 +22,13 @@ app.use(
     path.join(__dirname, "uploads")
   )
 );
+const successStoryRoutes =
+  require("./routes/successStory.routes");
+
+app.use(
+  "/api/success-stories",
+  successStoryRoutes
+);
 
 app.use(
   "/api/users",
