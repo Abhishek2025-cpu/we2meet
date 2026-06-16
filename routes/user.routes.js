@@ -18,16 +18,20 @@ const {
 // Public Routes
 router.post(
   "/register",
-  upload.fields([
-    {
-      name: "profilePhoto",
-      maxCount: 12
-    },
-    {
-      name: "kundaliPhoto",
-      maxCount: 10
-    }
-  ]),
+upload.fields([
+  {
+    name: "primaryProfilePhoto",
+    maxCount: 1
+  },
+  {
+    name: "profilePhoto",
+    maxCount: 12
+  },
+  {
+    name: "kundaliPhoto",
+    maxCount: 10
+  }
+]),
   createUser
 );
 

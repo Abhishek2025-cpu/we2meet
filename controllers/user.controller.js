@@ -56,6 +56,11 @@ exports.createUser = async (req, res) => {
       10
     );
 
+    const primaryProfilePhoto =
+  req.files?.primaryProfilePhoto?.[0]
+    ? `${process.env.BASE_URL}/uploads/profile/${req.files.primaryProfilePhoto[0].filename}`
+    : null;
+
 const profilePhotos =
   req.files?.profilePhoto?.map(
     file =>
@@ -112,7 +117,7 @@ const kundaliPhotos =
       : {}),
     kundaliPhotos
   },
-
+  primaryProfilePhoto,
   profilePhotos,
 
   freeUsedCount: 0,
@@ -310,6 +315,13 @@ exports.updateUser = async (req, res) => {
         ...JSON.parse(kundaliDetails)
       };
     }
+
+if (
+  req.files?.primaryProfilePhoto?.[0]
+) {
+  user.primaryProfilePhoto =
+    `${process.env.BASE_URL}/uploads/profile/${req.files.primaryProfilePhoto[0].filename}`;
+}
 
    if (req.files?.profilePhoto?.length) {
   const newPhotos = req.files.profilePhoto.map(
