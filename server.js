@@ -35,6 +35,13 @@ app.use(
   require("./routes/user.routes")
 );
 
+const profileViewRoutes =
+  require("./routes/profileView.routes"); 
+
+  app.use(
+    "/api/profile-views",
+    profileViewRoutes
+  );
 
 app.get("/", (req, res) => {
   res.json({
