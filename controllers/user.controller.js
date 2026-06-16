@@ -149,6 +149,35 @@ const kundaliPhotos =
   }
 };
 
+exports.getRecentJoins = async (req, res) => {
+  try {
+    const fifteenDaysAgo = new Date();
+
+    fifteenDaysAgo.setDate(
+      fifteenDaysAgo.getDate() - 15
+    );
+
+    const users = await User.find({
+      createdAt: {
+        $gte: fifteenDaysAgo
+      }
+    })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      message: "Recent joined users fetched successfully",
+      data: users
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 
 exports.login = async (req, res) => {

@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 
 const upload = require("../middleware/upload.middleware");
-
 const protect = require("../middleware/auth.middleware");
 
 const {
@@ -12,9 +11,11 @@ const {
   updateUser,
   getAllUsers,
   getUserById,
+  getRecentJoins,
   incrementFreeCount
 } = require("../controllers/user.controller");
 
+// Public Routes
 router.post(
   "/register",
   upload.fields([
@@ -32,9 +33,20 @@ router.post(
 
 router.post("/login", login);
 
+// Protected Routes
 router.get("/", protect, getAllUsers);
 
-router.get("/:id", protect, getUserById);
+router.get(
+  "/recent-joins",
+  protect,
+  getRecentJoins
+);
+
+router.patch(
+  "/:id/free-count",
+  protect,
+  incrementFreeCount
+);
 
 router.patch(
   "/:id",
@@ -46,16 +58,16 @@ router.patch(
     },
     {
       name: "kundaliPhoto",
-      maxCount: 5
+      maxCount: 10
     }
   ]),
   updateUser
 );
 
-router.patch(
-  "/:id/free-count",
+router.get(
+  "/:id",
   protect,
-  incrementFreeCount
+  getUserById
 );
 
 module.exports = router;
