@@ -311,23 +311,34 @@ exports.updateUser = async (req, res) => {
       };
     }
 
-    if (
-      req.files?.profilePhoto?.[0]
-    ) {
-      user.profilePhoto =
-        `${process.env.BASE_URL}/uploads/profile/${req.files.profilePhoto[0].filename}`;
-    }
+   if (req.files?.profilePhoto?.length) {
+  const newPhotos = req.files.profilePhoto.map(
+    (file) =>
+      `${process.env.BASE_URL}/uploads/profile/${file.filename}`
+  );
 
-    if (
-      req.files?.kundaliPhoto?.[0]
-    ) {
-      if (!user.kundaliDetails) {
-        user.kundaliDetails = {};
-      }
+  user.profilePhotos = [
+    ...(user.profilePhotos || []),
+    ...newPhotos
+  ];
+}
 
-      user.kundaliDetails.kundaliPhoto =
-        `${process.env.BASE_URL}/uploads/kundali/${req.files.kundaliPhoto[0].filename}`;
-    }
+  if (req.files?.kundaliPhoto?.length) {
+  if (!user.kundaliDetails) {
+    user.kundaliDetails = {};
+  }
+
+  const newKundaliPhotos =
+    req.files.kundaliPhoto.map(
+      (file) =>
+        `${process.env.BASE_URL}/uploads/kundali/${file.filename}`
+    );
+
+  user.kundaliDetails.kundaliPhotos = [
+    ...(user.kundaliDetails.kundaliPhotos || []),
+    ...newKundaliPhotos
+  ];
+}
 
     user.profileCompletionPercentage =
       calculateProfileCompletion(user);
