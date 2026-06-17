@@ -15,6 +15,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(
   "/uploads",
@@ -51,6 +58,21 @@ app.use(
   "/api/admin",
   adminRoutes
 );
+
+const planRoutes = require(
+  "./routes/plan.routes"
+);
+app.use("/api/plans", planRoutes);
+
+const adminPlanRoutes = require(
+  "./routes/adminPlan.routes"
+);
+
+app.use(
+  "/api/admin",
+  adminPlanRoutes
+);
+
 
 app.get("/", (req, res) => {
   res.json({
