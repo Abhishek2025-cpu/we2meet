@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
-
+const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
 
 const { generateToken } = require("../utils/jwt");
@@ -240,6 +240,8 @@ exports.login = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
+    console.log("DB Name:", mongoose.connection.name);
+console.log("DB Host:", mongoose.connection.host);
   try {
     const user = await User.findById(
       req.params.id
@@ -378,6 +380,8 @@ if (
 };
 
 exports.getAllUsers = async (req, res) => {
+    console.log("DB Name:", mongoose.connection.name);
+console.log("DB Host:", mongoose.connection.host);
   const users = await User.find().select(
     "-password"
   );
@@ -389,6 +393,8 @@ exports.getAllUsers = async (req, res) => {
 };
 
 exports.getUserById = async (req, res) => {
+    console.log("DB Name:", mongoose.connection.name);
+console.log("DB Host:", mongoose.connection.host);
   const user = await User.findById(
     req.params.id
   ).select("-password");

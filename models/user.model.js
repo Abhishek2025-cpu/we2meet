@@ -109,6 +109,10 @@ const UserSchema = new mongoose.Schema(
     }
   ]
     },
+    primaryProfilePhoto: {
+  type: String,
+  default: null
+},
 
  profilePhotos: [
   {

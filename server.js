@@ -43,12 +43,23 @@ const profileViewRoutes =
     profileViewRoutes
   );
 
+  const adminRoutes = require(
+  "./routes/admin.routes"
+);
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
 app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "API Running"
   });
 });
+
+
 
 const PORT = process.env.PORT || 5000;
 
