@@ -6,60 +6,47 @@ const Notification = require(
   "../models/notification.model"
 );
 
-exports.saveFcmToken =
-  async (req, res) => {
-    try {
-      const { fcmToken } =
-        req.body;
 
-      if (!fcmToken) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "FCM token is required"
-        });
-      }
 
-      const user =
-        await User.findById(
-          req.user._id
-        );
+exports.saveFcmToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
 
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "User not found"
-        });
-      }
-
-      if (
-        !user.fcmTokens?.includes(
-          fcmToken
-        )
-      ) {
-        user.fcmTokens = [
-          ...(user.fcmTokens ||
-            []),
-          fcmToken
-        ];
-
-        await user.save();
-      }
-
-      return res.status(200).json({
-        success: true,
-        message:
-          "FCM token saved successfully"
-      });
-    } catch (error) {
-      return res.status(500).json({
+    if (!fcmToken) {
+      return res.status(400).json({
         success: false,
-        message:
-          error.message
+        message: "FCM token is required"
       });
     }
-  };
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    user.fcmTokens = user.fcmTokens || [];
+
+    if (!user.fcmTokens.includes(fcmToken)) {
+      user.fcmTokens.push(fcmToken);
+      await user.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "FCM token saved successfully",
+      fcmTokens: user.fcmTokens
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 exports.getMyNotifications =
   async (req, res) => {
