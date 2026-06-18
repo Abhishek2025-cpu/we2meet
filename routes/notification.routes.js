@@ -35,7 +35,7 @@ router.patch(
 );
 
 router.patch(
-  "/read-all",
+  "\"
   protect,
   markAllNotificationsRead
 );

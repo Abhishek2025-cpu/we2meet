@@ -32,17 +32,11 @@ exports.createAdmin = async (
       });
     }
 
-    const hash =
-      await bcrypt.hash(
-        password,
-        10
-      );
-
     const admin =
       await Admin.create({
         name,
         email,
-        password: hash,
+        password,
         role
       });
 
@@ -84,13 +78,9 @@ exports.adminLogin = async (
       });
     }
 
-    const match =
-      await bcrypt.compare(
-        password,
-        admin.password
-      );
-
-    if (!match) {
+    if (
+      password !== admin.password
+    ) {
       return res.status(400).json({
         success: false,
         message:
