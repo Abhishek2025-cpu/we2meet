@@ -69,6 +69,13 @@ const adminPlanRoutes = require(
 );
 
 app.use(
+  "/api/notifications",
+  require(
+    "./routes/notification.routes"
+  )
+);
+
+app.use(
   "/api/admin",
   adminPlanRoutes
 );

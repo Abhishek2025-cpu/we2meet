@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const subscriptionPlanSchema =
   new mongoose.Schema(
     {
-      planName: {
-        type: String,
-        required: true
-      },
+    planName: {
+  type: String,
+  required: true,
+ 
+},
 
       description: {
         type: String,

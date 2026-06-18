@@ -4,6 +4,11 @@ const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
 
 const { generateToken } = require("../utils/jwt");
+const {
+  sendNotification
+} = require(
+  "../services/notification.service"
+)
 
 exports.createUser = async (req, res) => {
   try {
@@ -128,7 +133,20 @@ const kundaliPhotos =
       calculateProfileCompletion(user);
 
     await user.save();
-
+await sendNotification({
+  userId: user._id,
+  tokens:
+    user.fcmTokens || [],
+  title:
+    "Welcome to We2Meet",
+  message:
+    "Your profile has been created successfully.",
+  type: "welcome",
+  data: {
+    userId:
+      user._id.toString()
+  }
+});
     const token = generateToken(user._id);
 
     const userObj = user.toObject();
