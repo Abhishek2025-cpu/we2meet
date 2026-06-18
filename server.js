@@ -59,6 +59,15 @@ app.use(
   adminRoutes
 );
 
+const interactionRoutes = require(
+  "./routes/interaction.routes"
+);
+
+app.use(
+  "/api/interactions",
+  interactionRoutes
+);
+
 const planRoutes = require(
   "./routes/plan.routes"
 );
