@@ -61,15 +61,13 @@ exports.createUser = async (req, res) => {
       10
     );
 
-    const primaryProfilePhoto =
+  const primaryProfilePhoto =
   req.files?.primaryProfilePhoto?.[0]
-    ? `${process.env.BASE_URL}/uploads/profile/${req.files.primaryProfilePhoto[0].filename}`
-    : null;
+    ?.path || null;
 
 const profilePhotos =
   req.files?.profilePhoto?.map(
-    file =>
-      `${process.env.BASE_URL}/uploads/profile/${file.filename}`
+    file => file.path
   ) || [];
 
 const kundaliPhotos =
@@ -339,15 +337,15 @@ console.log("DB Host:", mongoose.connection.host);
 if (
   req.files?.primaryProfilePhoto?.[0]
 ) {
-  user.primaryProfilePhoto =
-    `${process.env.BASE_URL}/uploads/profile/${req.files.primaryProfilePhoto[0].filename}`;
+ user.primaryProfilePhoto =
+req.files.primaryProfilePhoto[0].path;
 }
 
    if (req.files?.profilePhoto?.length) {
-  const newPhotos = req.files.profilePhoto.map(
-    (file) =>
-      `${process.env.BASE_URL}/uploads/profile/${file.filename}`
-  );
+const newPhotos =
+req.files.profilePhoto.map(
+(file) => file.path
+);
 
   user.profilePhotos = [
     ...(user.profilePhotos || []),
@@ -361,10 +359,9 @@ if (
   }
 
   const newKundaliPhotos =
-    req.files.kundaliPhoto.map(
-      (file) =>
-        `${process.env.BASE_URL}/uploads/kundali/${file.filename}`
-    );
+req.files.kundaliPhoto.map(
+(file) => file.path
+);
 
   user.kundaliDetails.kundaliPhotos = [
     ...(user.kundaliDetails.kundaliPhotos || []),

@@ -1,44 +1,40 @@
 const multer = require("multer");
-const path = require("path");
+const {
+  CloudinaryStorage
+} = require("multer-storage-cloudinary");
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, "uploads/profile");
-  },
+const cloudinary = require(
+  "../config/cloudinary"
+);
 
-  filename(req, file, cb) {
-    cb(
-      null,
-      Date.now() +
-        "-" +
-        Math.round(Math.random() * 1000000) +
-        path.extname(file.originalname)
-    );
-  }
-});
+const storage =
+  new CloudinaryStorage({
+    cloudinary,
+    params: async (
+      req,
+      file
+    ) => {
+      let folder = "we2meet/profile";
+
+      if (
+        file.fieldname ===
+        "kundaliPhoto"
+      ) {
+        folder =
+          "we2meet/kundali";
+      }
+
+      return {
+        folder,
+        resource_type: "auto"
+      };
+    }
+  });
 
 module.exports = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024
-  },
-  fileFilter(req, file, cb) {
-   const allowed = [
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/webp",
-  "application/pdf"
-];
-
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          "Only jpg, jpeg, png and webp files allowed"
-        )
-      );
-    }
+    fileSize:
+      5 * 1024 * 1024
   }
 });
