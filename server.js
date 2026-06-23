@@ -24,6 +24,16 @@ app.use(
 );
 
 
+const adminDashboardRoutes =
+  require(
+    "./routes/adminDashboard.routes"
+  );
+
+app.use(
+  "/api/admin",
+  adminDashboardRoutes
+);
+
 const successStoryRoutes =
   require("./routes/successStory.routes");
 
