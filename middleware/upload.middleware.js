@@ -7,6 +7,10 @@ const cloudinary = require(
   "../config/cloudinary"
 );
 
+console.log("Cloudinary from middleware =>");
+console.log(cloudinary);
+console.log("Uploader =>", cloudinary?.uploader);
+
 const storage =
   new CloudinaryStorage({
     cloudinary,
