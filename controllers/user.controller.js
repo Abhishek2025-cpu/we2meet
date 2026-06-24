@@ -395,6 +395,8 @@ req.files.kundaliPhoto.map(
   }
 };
 
+
+
 exports.getAllUsers = async (
 req,
 res
@@ -405,6 +407,7 @@ await User.findById(
 req.user._id
 );
 
+```
 const users =
   await User.find({
     _id: {
@@ -427,6 +430,7 @@ return res.json({
   success: true,
   data
 });
+```
 
 } catch (error) {
 return res.status(500).json({
@@ -481,6 +485,7 @@ message: error.message
 });
 }
 };
+
 
 
 exports.incrementFreeCount = async (
