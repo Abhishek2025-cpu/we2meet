@@ -57,6 +57,10 @@ router.patch(
   protect,
   upload.fields([
     {
+      name: "primaryProfilePhoto",
+      maxCount: 1
+    },
+    {
       name: "profilePhoto",
       maxCount: 12
     },
