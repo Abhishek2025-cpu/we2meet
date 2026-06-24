@@ -2,8 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
-const calculateMatchPercentage =
-require("../utils/matchPercentage");
+const calculateMatchPercentage = require("../utils/matchPercentage");
 
 const { generateToken } = require("../utils/jwt");
 const {
