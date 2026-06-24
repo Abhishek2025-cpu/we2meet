@@ -2,6 +2,8 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
+const calculateMatchPercentage =
+require("../utils/matchPercentage");
 
 const { generateToken } = require("../utils/jwt");
 const {
@@ -394,31 +396,93 @@ req.files.kundaliPhoto.map(
   }
 };
 
-exports.getAllUsers = async (req, res) => {
-    console.log("DB Name:", mongoose.connection.name);
-console.log("DB Host:", mongoose.connection.host);
-  const users = await User.find().select(
-    "-password"
-  );
+exports.getAllUsers = async (
+req,
+res
+) => {
+try {
+const currentUser =
+await User.findById(
+req.user._id
+);
 
-  res.json({
-    success: true,
-    data: users
-  });
+const users =
+  await User.find({
+    _id: {
+      $ne: req.user._id
+    }
+  }).select("-password");
+
+const data = users.map(
+  (user) => ({
+    ...user.toObject(),
+    matchPercentage:
+      calculateMatchPercentage(
+        currentUser,
+        user
+      )
+  })
+);
+
+return res.json({
+  success: true,
+  data
+});
+
+} catch (error) {
+return res.status(500).json({
+success: false,
+message: error.message
+});
+}
 };
 
-exports.getUserById = async (req, res) => {
-    console.log("DB Name:", mongoose.connection.name);
-console.log("DB Host:", mongoose.connection.host);
-  const user = await User.findById(
+exports.getUserById = async (
+req,
+res
+) => {
+try {
+const currentUser =
+await User.findById(
+req.user._id
+);
+
+```
+const user =
+  await User.findById(
     req.params.id
   ).select("-password");
 
-  res.json({
-    success: true,
-    data: user
+if (!user) {
+  return res.status(404).json({
+    success: false,
+    message: "User not found"
   });
+}
+
+const userObj =
+  user.toObject();
+
+userObj.matchPercentage =
+  calculateMatchPercentage(
+    currentUser,
+    user
+  );
+
+return res.json({
+  success: true,
+  data: userObj
+});
+```
+
+} catch (error) {
+return res.status(500).json({
+success: false,
+message: error.message
+});
+}
 };
+
 
 exports.incrementFreeCount = async (
   req,
