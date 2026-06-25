@@ -458,7 +458,7 @@ await User.findById(
 req.user._id
 );
 
-```
+
 const user =
   await User.findById(
     req.params.id
@@ -484,7 +484,7 @@ return res.json({
   success: true,
   data: userObj
 });
-```
+
 
 } catch (error) {
 return res.status(500).json({
