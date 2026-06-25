@@ -34,6 +34,15 @@ app.use(
   adminDashboardRoutes
 );
 
+
+app.use(
+  "/api/video-intro",
+  require(
+    "./routes/videoIntro.routes"
+  )
+);
+
+
 const successStoryRoutes =
   require("./routes/successStory.routes");
 

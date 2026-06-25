@@ -14,7 +14,8 @@ const {
   getAllUsersAdmin,
   getUserByIdAdmin,
   getAllAdmins,
-  deleteUserAdmin
+  deleteUserAdmin,
+    getAllPlanClicks
 } = require(
   "../controllers/admin.controller"
 );
@@ -91,4 +92,13 @@ router.get(
   adminProtect,
   planAnalytics
 );
+
+
+router.get(
+  "/plan-clicks",
+  adminProtect,
+  getAllPlanClicks
+);
+
+
 module.exports = router;

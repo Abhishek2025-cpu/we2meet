@@ -2,9 +2,40 @@ const bcrypt = require("bcryptjs");
 const Admin = require("../models/admin.model");
 const User = require("../models/user.model");
 
+
 const generateAdminToken = require(
   "../utils/adminToken"
 );
+
+exports.getAllPlanClicks = async (req, res) => {
+  try {
+    const data = await PlanInterest.find()
+      .populate(
+        "userId",
+        "legalName phone email primaryProfilePhoto" // Added profile photo here
+      )
+      .populate(
+        "planId",
+        "planName price"
+      )
+      .sort({ createdAt: -1 });
+
+    // Filter out records where the user was deleted (userId is null)
+    const validData = data.filter(item => item.userId !== null);
+
+    res.json({
+      success: true,
+      count: validData.length,
+      data: validData
+    });
+  } catch (error) {
+    console.error("PLAN CLICK ERROR =>", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 
 exports.createAdmin = async (
@@ -243,3 +274,6 @@ exports.getAllUsersAdmin =
     });
   }
 };
+const PlanInterest = require(
+  "../models/planInterest.model"
+);
