@@ -19,6 +19,14 @@ const {
   "../controllers/admin.controller"
 );
 
+const {
+  userGrowthGraph,
+  interestAnalytics,
+  planAnalytics
+} = require(
+  "../controllers/adminAnalytics.controller"
+);
+
 router.post(
   "/create",
   createAdmin
@@ -65,4 +73,22 @@ router.delete(
   deleteUserAdmin
 );
 
+
+router.get(
+  "/user-growth",
+  adminProtect,
+  userGrowthGraph
+);
+
+router.get(
+  "/interest-analytics",
+  adminProtect,
+  interestAnalytics
+);
+
+router.get(
+  "/plan-analytics",
+  adminProtect,
+  planAnalytics
+);
 module.exports = router;
