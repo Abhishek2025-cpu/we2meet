@@ -78,6 +78,13 @@ const interactionRoutes = require(
 );
 
 app.use(
+  "/api/search",
+  require(
+    "./routes/search.routes"
+  )
+);
+
+app.use(
   "/api/interactions",
   interactionRoutes
 );
