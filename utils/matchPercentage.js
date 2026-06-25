@@ -1,70 +1,84 @@
-
-
-function calculateMatchPercentage(currentUser, targetUser) {
+function calculateMatchPercentage(
+currentUser,
+targetUser
+) {
 let score = 0;
 
 if (
 currentUser.religion &&
-currentUser.religion === targetUser.religion
+currentUser.religion ===
+targetUser.religion
 ) {
 score += 15;
 }
 
 if (
 currentUser.caste &&
-currentUser.caste === targetUser.caste
+currentUser.caste ===
+targetUser.caste
 ) {
 score += 10;
 }
 
 if (
 currentUser.motherTongue &&
-currentUser.motherTongue === targetUser.motherTongue
+currentUser.motherTongue ===
+targetUser.motherTongue
 ) {
 score += 10;
 }
 
 if (
 currentUser.qualification &&
-currentUser.qualification === targetUser.qualification
+currentUser.qualification ===
+targetUser.qualification
 ) {
 score += 10;
 }
 
 if (
 currentUser.profession &&
-currentUser.profession === targetUser.profession
+currentUser.profession ===
+targetUser.profession
 ) {
 score += 10;
 }
 
 if (
 currentUser.workingWith &&
-currentUser.workingWith === targetUser.workingWith
+currentUser.workingWith ===
+targetUser.workingWith
 ) {
 score += 5;
 }
 
-const income1 =
-Number(currentUser.annualIncome || 0);
+const income1 = Number(
+currentUser.annualIncome || 0
+);
 
-const income2 =
-Number(targetUser.annualIncome || 0);
+const income2 = Number(
+targetUser.annualIncome || 0
+);
 
-const incomeDiff =
-Math.abs(income1 - income2);
+const incomeDiff = Math.abs(
+income1 - income2
+);
 
 if (incomeDiff <= 500000) {
 score += 10;
-} else if (incomeDiff <= 1000000) {
+} else if (
+incomeDiff <= 1000000
+) {
 score += 5;
 }
 
 const life1 =
-currentUser.lifeStyleDetails || {};
+currentUser.lifeStyleDetails ||
+{};
 
 const life2 =
-targetUser.lifeStyleDetails || {};
+targetUser.lifeStyleDetails ||
+{};
 
 if (
 life1.diet &&
@@ -75,38 +89,44 @@ score += 5;
 
 if (
 life1.smoking &&
-life1.smoking === life2.smoking
+life1.smoking ===
+life2.smoking
 ) {
 score += 3;
 }
 
 if (
 life1.drinking &&
-life1.drinking === life2.drinking
+life1.drinking ===
+life2.drinking
 ) {
 score += 2;
 }
 
 const pref =
-currentUser.partnerPreference || {};
+currentUser.partnerPreference ||
+{};
 
 if (
 pref.religion &&
-pref.religion === targetUser.religion
+pref.religion ===
+targetUser.religion
 ) {
 score += 5;
 }
 
 if (
 pref.caste &&
-pref.caste === targetUser.caste
+pref.caste ===
+targetUser.caste
 ) {
 score += 5;
 }
 
 if (
 pref.motherTongue &&
-pref.motherTongue === targetUser.motherTongue
+pref.motherTongue ===
+targetUser.motherTongue
 ) {
 score += 5;
 }
@@ -117,20 +137,25 @@ targetUser.dob
 ) {
 const age1 =
 new Date().getFullYear() -
-new Date(currentUser.dob).getFullYear();
+new Date(
+currentUser.dob
+).getFullYear();
 
-```
+
 const age2 =
   new Date().getFullYear() -
-  new Date(targetUser.dob).getFullYear();
+  new Date(
+    targetUser.dob
+  ).getFullYear();
 
-const diff =
-  Math.abs(age1 - age2);
+const diff = Math.abs(
+  age1 - age2
+);
 
 if (diff <= 3) {
   score += 5;
 }
-```
+
 
 }
 

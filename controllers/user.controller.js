@@ -11,6 +11,8 @@ const {
   "../services/notification.service"
 )
 
+
+
 exports.createUser = async (req, res) => {
   try {
     console.log("BODY =>", req.body);
@@ -171,6 +173,7 @@ await sendNotification({
   }
 };
 
+
 exports.getRecentJoins = async (req, res) => {
   try {
     const fifteenDaysAgo = new Date();
@@ -255,6 +258,8 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+
 
 exports.updateUser = async (req, res) => {
     console.log("DB Name:", mongoose.connection.name);
@@ -397,48 +402,51 @@ req.files.kundaliPhoto.map(
 
 
 
-exports.getAllUsers = async (
-req,
-res
-) => {
-try {
-const currentUser =
-await User.findById(
-req.user._id
-);
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Checkpoint 1: Verify the function exists at the start
+    console.log("Type of calculateMatchPercentage:", typeof calculateMatchPercentage);
 
-```
-const users =
-  await User.find({
-    _id: {
-      $ne: req.user._id
-    }
-  }).select("-password");
+    const currentUser = await User.findById(req.user._id);
+    console.log("Checkpoint: currentUser fetched", currentUser ? "Success" : "Failed");
 
-const data = users.map(
-  (user) => ({
-    ...user.toObject(),
-    matchPercentage:
-      calculateMatchPercentage(
-        currentUser,
-        user
-      )
-  })
-);
+    const users = await User.find({
+      _id: { $ne: req.user._id }
+    }).select("-password");
+    console.log(`Checkpoint: Found ${users.length} users`);
 
-return res.json({
-  success: true,
-  data
-});
-```
+    const data = users.map((user, index) => {
+      // Checkpoint 2: Log which index we are processing
+      try {
+        return {
+          ...user.toObject(),
+          matchPercentage: calculateMatchPercentage(currentUser, user)
+        };
+      } catch (mapError) {
+        // This will catch the error specifically inside the loop
+        console.error(`Error processing user at index ${index}:`, mapError.message);
+        throw mapError; 
+      }
+    });
 
-} catch (error) {
-return res.status(500).json({
-success: false,
-message: error.message
-});
-}
+    return res.json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    // THIS LINE IS THE MOST IMPORTANT:
+    // It will print the exact file path and line number in your terminal
+    console.error("FULL ERROR STACK TRACE:");
+    console.error(error.stack); 
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
+
 
 exports.getUserById = async (
 req,
