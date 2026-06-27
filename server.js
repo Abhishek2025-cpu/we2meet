@@ -89,6 +89,11 @@ app.use(
   interactionRoutes
 );
 
+app.use(
+  "/api/admin-notifications",
+  require("./routes/adminNotification.routes")
+);
+
 const planRoutes = require(
   "./routes/plan.routes"
 );

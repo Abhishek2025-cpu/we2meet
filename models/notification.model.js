@@ -19,6 +19,11 @@ const notificationSchema =
         required: true
       },
 
+      image: {
+        type: String,
+        default: ""
+      },
+
       type: {
         type: String,
         default: "general"
