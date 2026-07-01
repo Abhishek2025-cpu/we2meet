@@ -12,7 +12,11 @@ const {
   getAllUsers,
   getUserById,
   getRecentJoins,
-  incrementFreeCount
+  incrementFreeCount,
+  changePassword,
+  deactivateAccount,
+  activateAccount,
+  deleteAccount
 } = require("../controllers/user.controller");
 
 // Public Routes
@@ -76,6 +80,30 @@ router.get(
   "/:id",
   protect,
   getUserById
+);
+
+router.patch(
+  "/change-password",
+  protect,
+  changePassword
+);
+
+router.patch(
+  "/deactivate",
+  protect,
+  deactivateAccount
+);
+
+router.patch(
+  "/activate",
+  protect,
+  activateAccount
+);
+
+router.delete(
+  "/delete-account",
+  protect,
+  deleteAccount
 );
 
 module.exports = router;

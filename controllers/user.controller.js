@@ -260,7 +260,6 @@ exports.login = async (req, res) => {
 };
 
 
-
 exports.updateUser = async (req, res) => {
     console.log("DB Name:", mongoose.connection.name);
 console.log("DB Host:", mongoose.connection.host);
@@ -400,8 +399,6 @@ req.files.kundaliPhoto.map(
   }
 };
 
-
-
 exports.getAllUsers = async (req, res) => {
   try {
     // Checkpoint 1: Verify the function exists at the start
@@ -495,7 +492,6 @@ message: error.message
 };
 
 
-
 exports.incrementFreeCount = async (
   req,
   res
@@ -519,4 +515,116 @@ exports.incrementFreeCount = async (
       user.maxFreeLimit -
       user.freeUsedCount
   });
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Old and new password are required"
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Old password is incorrect"
+      });
+    }
+
+    user.password = await bcrypt.hash(
+      newPassword,
+      10
+    );
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password changed successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.deactivateAccount = async (req, res) => {
+  try {
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        isActive: false
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Account deactivated successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.activateAccount = async (req, res) => {
+  try {
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        isActive: true
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Account activated successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+exports.deleteAccount = async (req, res) => {
+  try {
+
+    await User.findByIdAndDelete(
+      req.user._id
+    );
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
