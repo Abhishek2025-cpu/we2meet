@@ -356,45 +356,52 @@ exports.searchAndFilterUsers = async (req, res) => {
 
     const filter = {};
 
-    if (gender) {
-      filter.gender = gender;
-    }
-
-    if (city) {
-      filter.city = {
-        $regex: city,
-        $options: "i"
-      };
-    }
-
-    if (state) {
-      filter.state = {
-        $regex: state,
-        $options: "i"
-      };
-    }
-
+    // Search
     if (search) {
       filter.$or = [
         {
           legalName: {
-            $regex: search,
+            $regex: search.trim(),
             $options: "i"
           }
         },
         {
           email: {
-            $regex: search,
+            $regex: search.trim(),
             $options: "i"
           }
         },
         {
           phone: {
-            $regex: search,
+            $regex: search.trim(),
             $options: "i"
           }
         }
       ];
+    }
+
+    // Gender (Case Insensitive)
+    if (gender) {
+      filter.gender = {
+        $regex: `^${gender.trim()}$`,
+        $options: "i"
+      };
+    }
+
+    // City
+    if (city) {
+      filter.city = {
+        $regex: city.trim(),
+        $options: "i"
+      };
+    }
+
+    // State
+    if (state) {
+      filter.state = {
+        $regex: state.trim(),
+        $options: "i"
+      };
     }
 
     const total = await User.countDocuments(filter);
@@ -402,17 +409,18 @@ exports.searchAndFilterUsers = async (req, res) => {
     const users = await User.find(filter)
       .select("-password")
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
+      .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit));
 
     return res.status(200).json({
       success: true,
       total,
       page: Number(page),
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / Number(limit)),
       count: users.length,
       data: users
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
