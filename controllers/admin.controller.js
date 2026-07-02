@@ -342,3 +342,81 @@ exports.activateUser = async (req, res) => {
     });
   }
 };
+
+exports.searchAndFilterUsers = async (req, res) => {
+  try {
+    const {
+      search,
+      gender,
+      city,
+      state,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const filter = {};
+
+    if (gender) {
+      filter.gender = gender;
+    }
+
+    if (city) {
+      filter.city = {
+        $regex: city,
+        $options: "i"
+      };
+    }
+
+    if (state) {
+      filter.state = {
+        $regex: state,
+        $options: "i"
+      };
+    }
+
+    if (search) {
+      filter.$or = [
+        {
+          legalName: {
+            $regex: search,
+            $options: "i"
+          }
+        },
+        {
+          email: {
+            $regex: search,
+            $options: "i"
+          }
+        },
+        {
+          phone: {
+            $regex: search,
+            $options: "i"
+          }
+        }
+      ];
+    }
+
+    const total = await User.countDocuments(filter);
+
+    const users = await User.find(filter)
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    return res.status(200).json({
+      success: true,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / limit),
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
