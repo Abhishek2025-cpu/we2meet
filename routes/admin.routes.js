@@ -15,7 +15,9 @@ const {
   getUserByIdAdmin,
   getAllAdmins,
   deleteUserAdmin,
-    getAllPlanClicks
+    getAllPlanClicks,
+      suspendUser,
+  activateUser
 } = require(
   "../controllers/admin.controller"
 );
@@ -38,6 +40,17 @@ router.post(
   adminLogin
 );
 
+router.patch(
+  "/users/:id/suspend",
+  adminProtect,
+  suspendUser
+);
+
+router.patch(
+  "/users/:id/activate",
+  adminProtect,
+  activateUser
+);
 
 router.get(
   "/",
