@@ -19,36 +19,79 @@ const {
   deleteAccount
 } = require("../controllers/user.controller");
 
+// ==========================
 // Public Routes
+// ==========================
+
 router.post(
   "/register",
-upload.fields([
-  {
-    name: "primaryProfilePhoto",
-    maxCount: 1
-  },
-  {
-    name: "profilePhoto",
-    maxCount: 12
-  },
-  {
-    name: "kundaliPhoto",
-    maxCount: 10
-  }
-]),
+  upload.fields([
+    {
+      name: "primaryProfilePhoto",
+      maxCount: 1
+    },
+    {
+      name: "profilePhoto",
+      maxCount: 12
+    },
+    {
+      name: "kundaliPhoto",
+      maxCount: 10
+    }
+  ]),
   createUser
 );
 
 router.post("/login", login);
 
+// ==========================
 // Protected Routes
-router.get("/", protect, getAllUsers);
+// ==========================
+
+router.get(
+  "/",
+  protect,
+  getAllUsers
+);
 
 router.get(
   "/recent-joins",
   protect,
   getRecentJoins
 );
+
+// ==========================
+// Account Management
+// (Keep these before /:id)
+// ==========================
+
+router.patch(
+  "/change-password",
+  protect,
+  changePassword
+);
+
+router.patch(
+  "/deactivate",
+  protect,
+  deactivateAccount
+);
+
+router.patch(
+  "/activate",
+  protect,
+  activateAccount
+);
+
+router.delete(
+  "/delete-account",
+  protect,
+  deleteAccount
+);
+
+// ==========================
+// User Specific Routes
+// ==========================
 
 router.patch(
   "/:id/free-count",
@@ -80,30 +123,6 @@ router.get(
   "/:id",
   protect,
   getUserById
-);
-
-router.patch(
-  "/change-password",
-  protect,
-  changePassword
-);
-
-router.patch(
-  "/deactivate",
-  protect,
-  deactivateAccount
-);
-
-router.patch(
-  "/activate",
-  protect,
-  activateAccount
-);
-
-router.delete(
-  "/delete-account",
-  protect,
-  deleteAccount
 );
 
 module.exports = router;
