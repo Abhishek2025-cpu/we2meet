@@ -7,7 +7,8 @@ const adminProtect = require("../middleware/admin.middleware");
 const upload = require("../middleware/upload.middleware");
 
 const {
-sendPlanNotification
+sendPlanNotification,
+  sendGenderNotification
 } = require("../controllers/adminNotification.controller");
 
 router.post(
@@ -15,6 +16,13 @@ router.post(
 adminProtect,
 upload.single("image"),
 sendPlanNotification
+);
+
+router.post(
+  "/gender/:gender/send",
+  adminProtect,
+  upload.single("image"),
+  sendGenderNotification
 );
 
 module.exports = router;
