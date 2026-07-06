@@ -12,6 +12,7 @@ const {
 )
 
 
+
 exports.createUser = async (req, res) => {
   try {
     console.log("BODY =>", req.body);
@@ -34,15 +35,12 @@ exports.createUser = async (req, res) => {
       workingWith,
       profession,
       annualIncome,
-
       familyDetails,
       partnerPreference,
       lifeStyleDetails,
       myStory,
       kundaliDetails,
       profiles,
-
-      // NEW
       fcmToken
     } = req.body;
 
@@ -129,7 +127,6 @@ exports.createUser = async (req, res) => {
       freeUsedCount: 0,
       maxFreeLimit: 5,
 
-      // SAVE FCM TOKEN
       fcmTokens: fcmToken
         ? [fcmToken]
         : []
@@ -140,20 +137,8 @@ exports.createUser = async (req, res) => {
 
     await user.save();
 
-    // Save welcome notification in DB
-    await Notification.create({
-      userId: user._id,
-      title: "Welcome to We2Meet",
-      message:
-        "Your profile has been created successfully.",
-      type: "welcome"
-    });
-
-    // Send Push Notification
-    if (
-      user.fcmTokens &&
-      user.fcmTokens.length > 0
-    ) {
+    // Send Welcome Notification (DB + FCM)
+    if (user.fcmTokens?.length) {
       try {
         await sendNotification({
           userId: user._id,
@@ -177,13 +162,11 @@ exports.createUser = async (req, res) => {
     const token = generateToken(user._id);
 
     const userObj = user.toObject();
-
     delete userObj.password;
 
     return res.status(201).json({
       success: true,
-      message:
-        "Profile created successfully",
+      message: "Profile created successfully",
       data: {
         token,
         ...userObj
@@ -199,6 +182,8 @@ exports.createUser = async (req, res) => {
     });
   }
 };
+
+
 
 
 
