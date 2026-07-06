@@ -102,6 +102,12 @@ const UserSchema = new mongoose.Schema(
       values: [String],
       lifeGoal: String
     },
+    
+    fcmTokens: [
+  {
+    type: String
+  }
+],
 
     kundaliDetails: {
       dob: Date,

@@ -12,12 +12,10 @@ const {
 )
 
 
-
 exports.createUser = async (req, res) => {
   try {
     console.log("BODY =>", req.body);
     console.log("FILES =>", req.files);
-   
 
     const {
       createdFor,
@@ -42,7 +40,10 @@ exports.createUser = async (req, res) => {
       lifeStyleDetails,
       myStory,
       kundaliDetails,
-      profiles
+      profiles,
+
+      // NEW
+      fcmToken
     } = req.body;
 
     const exists = await User.findOne({
@@ -64,90 +65,115 @@ exports.createUser = async (req, res) => {
       10
     );
 
-  const primaryProfilePhoto =
-  req.files?.primaryProfilePhoto?.[0]
-    ?.path || null;
+    const primaryProfilePhoto =
+      req.files?.primaryProfilePhoto?.[0]?.path || null;
 
-const profilePhotos =
-  req.files?.profilePhoto?.map(
-    file => file.path
-  ) || [];
+    const profilePhotos =
+      req.files?.profilePhoto?.map(
+        (file) => file.path
+      ) || [];
 
-const kundaliPhotos =
-  req.files?.kundaliPhoto?.map(
-    file =>
-      `${process.env.BASE_URL}/uploads/kundali/${file.filename}`
-  ) || [];
+    const kundaliPhotos =
+      req.files?.kundaliPhoto?.map(
+        (file) => file.path
+      ) || [];
 
-   const user = await User.create({
-  createdFor,
-  legalName,
-  email,
-  phone,
-  password: hashPassword,
-  gender,
-  dob,
-  religion,
-  caste,
-  subCaste,
-  motherTongue,
-  qualification,
-  college,
-  workingWith,
-  profession,
-  annualIncome,
+    const user = await User.create({
+      createdFor,
+      legalName,
+      email,
+      phone,
+      password: hashPassword,
+      gender,
+      dob,
+      religion,
+      caste,
+      subCaste,
+      motherTongue,
+      qualification,
+      college,
+      workingWith,
+      profession,
+      annualIncome,
 
-  profiles: profiles
-    ? JSON.parse(profiles)
-    : [],
+      profiles: profiles
+        ? JSON.parse(profiles)
+        : [],
 
-  familyDetails: familyDetails
-    ? JSON.parse(familyDetails)
-    : {},
+      familyDetails: familyDetails
+        ? JSON.parse(familyDetails)
+        : {},
 
-  partnerPreference: partnerPreference
-    ? JSON.parse(partnerPreference)
-    : {},
+      partnerPreference: partnerPreference
+        ? JSON.parse(partnerPreference)
+        : {},
 
-  lifeStyleDetails: lifeStyleDetails
-    ? JSON.parse(lifeStyleDetails)
-    : {},
+      lifeStyleDetails: lifeStyleDetails
+        ? JSON.parse(lifeStyleDetails)
+        : {},
 
-  myStory: myStory
-    ? JSON.parse(myStory)
-    : {},
+      myStory: myStory
+        ? JSON.parse(myStory)
+        : {},
 
-  kundaliDetails: {
-    ...(kundaliDetails
-      ? JSON.parse(kundaliDetails)
-      : {}),
-    kundaliPhotos
-  },
-  primaryProfilePhoto,
-  profilePhotos,
+      kundaliDetails: {
+        ...(kundaliDetails
+          ? JSON.parse(kundaliDetails)
+          : {}),
+        kundaliPhotos
+      },
 
-  freeUsedCount: 0,
-  maxFreeLimit: 5
-});
+      primaryProfilePhoto,
+      profilePhotos,
+
+      freeUsedCount: 0,
+      maxFreeLimit: 5,
+
+      // SAVE FCM TOKEN
+      fcmTokens: fcmToken
+        ? [fcmToken]
+        : []
+    });
 
     user.profileCompletionPercentage =
       calculateProfileCompletion(user);
 
     await user.save();
-await sendNotification({
-  userId: user._id,
-  tokens:
-    user.fcmTokens || [],
-  title:
-    "Welcome to We2Meet",
-  message:
-    "Your profile has been created successfully.",
-  type: "welcome",
-  data: {
-    userId:
-      user._id.toString()
-  }
-});
+
+    // Save welcome notification in DB
+    await Notification.create({
+      userId: user._id,
+      title: "Welcome to We2Meet",
+      message:
+        "Your profile has been created successfully.",
+      type: "welcome"
+    });
+
+    // Send Push Notification
+    if (
+      user.fcmTokens &&
+      user.fcmTokens.length > 0
+    ) {
+      try {
+        await sendNotification({
+          userId: user._id,
+          tokens: user.fcmTokens,
+          title: "Welcome to We2Meet",
+          message:
+            "Your profile has been created successfully.",
+          type: "welcome",
+          data: {
+            userId: user._id.toString()
+          }
+        });
+      } catch (err) {
+        console.error(
+          "FCM Error:",
+          err.message
+        );
+      }
+    }
+
     const token = generateToken(user._id);
 
     const userObj = user.toObject();
@@ -163,6 +189,7 @@ await sendNotification({
         ...userObj
       }
     });
+
   } catch (error) {
     console.error(error);
 
@@ -172,6 +199,7 @@ await sendNotification({
     });
   }
 };
+
 
 
 exports.getRecentJoins = async (req, res) => {
