@@ -76,6 +76,8 @@ exports.createUser = async (req, res) => {
         (file) => file.path
       ) || [];
 
+
+    console.log("Incoming FCM Token:", fcmToken);
     const user = await User.create({
       createdFor,
       legalName,
@@ -182,10 +184,6 @@ exports.createUser = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 exports.getRecentJoins = async (req, res) => {
   try {
