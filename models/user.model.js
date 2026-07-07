@@ -87,7 +87,31 @@ const UserSchema = new mongoose.Schema(
 
       religions: [String],
 
-      motherTongues: [String]
+      motherTongues: [String],
+
+      castes: [String],
+
+      qualifications: [String],
+
+      workingWith: [String],
+
+      professions: [String],
+
+      annualIncomeMin: Number,
+      annualIncomeMax: Number,
+
+      dietaryPreference: [String],
+
+      smoking: Boolean,
+      drinking: Boolean,
+
+      familyStatus: [String],
+      familyType: [String],
+      familyValues: [String],
+
+      manglik: Boolean,
+
+      gender: String
     },
 
     lifeStyleDetails: {

@@ -105,6 +105,11 @@ const adminPlanRoutes = require(
 );
 
 app.use(
+  "/api/matches",
+  require("./routes/matches.routes")
+);
+
+app.use(
   "/api/notifications",
   require(
     "./routes/notification.routes"
