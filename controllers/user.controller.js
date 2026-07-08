@@ -41,6 +41,8 @@ exports.createUser = async (req, res) => {
       myStory,
       kundaliDetails,
       profiles,
+      lifestyle,
+      horoscope,
       fcmToken
     } = req.body;
 
@@ -122,6 +124,14 @@ exports.createUser = async (req, res) => {
           : {}),
         kundaliPhotos
       },
+
+      lifestyle: lifestyle
+        ? (typeof lifestyle === "string" ? JSON.parse(lifestyle) : lifestyle)
+        : {},
+
+      horoscope: horoscope
+        ? (typeof horoscope === "string" ? JSON.parse(horoscope) : horoscope)
+        : {},
 
       primaryProfilePhoto,
       profilePhotos,
@@ -292,7 +302,9 @@ console.log("DB Host:", mongoose.connection.host);
       lifeStyleDetails,
       myStory,
       kundaliDetails,
-      profiles
+      profiles,
+      lifestyle,
+      horoscope
     } = req.body;
 
     Object.keys(req.body).forEach((key) => {
@@ -303,7 +315,9 @@ console.log("DB Host:", mongoose.connection.host);
           "lifeStyleDetails",
           "myStory",
           "kundaliDetails",
-          "profiles"
+          "profiles",
+          "lifestyle",
+          "horoscope"
         ].includes(key)
       ) {
         user[key] = req.body[key];
@@ -347,6 +361,20 @@ console.log("DB Host:", mongoose.connection.host);
       user.kundaliDetails = {
         ...user.kundaliDetails,
         ...JSON.parse(kundaliDetails)
+      };
+    }
+
+    if (lifestyle) {
+      user.lifestyle = {
+        ...user.lifestyle,
+        ...(typeof lifestyle === "string" ? JSON.parse(lifestyle) : lifestyle)
+      };
+    }
+
+    if (horoscope) {
+      user.horoscope = {
+        ...user.horoscope,
+        ...(typeof horoscope === "string" ? JSON.parse(horoscope) : horoscope)
       };
     }
 

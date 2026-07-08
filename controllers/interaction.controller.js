@@ -1,3 +1,6 @@
+const User = require("../models/user.model");
+const { sendNotification } = require("../services/notification.service");
+
 const Interest = require(
   "../models/interest.model"
 );
@@ -20,45 +23,48 @@ const Notification = require(
 
 
 
-exports.sendInterest = async (
-  req,
-  res
-) => {
+exports.sendInterest = async (req, res) => {
   try {
-    const exists =
-      await Interest.findOne({
-        senderId: req.user._id,
-        receiverId:
-          req.body.receiverId
-      });
+    const exists = await Interest.findOne({
+      senderId: req.user._id,
+      receiverId: req.body.receiverId
+    });
 
     if (exists) {
       return res.status(400).json({
         success: false,
-        message:
-          "Interest already sent"
+        message: "Interest already sent"
       });
     }
 
-    const interest =
-      await Interest.create({
-        senderId: req.user._id,
-        receiverId:
-          req.body.receiverId
-      });
+    const interest = await Interest.create({
+      senderId: req.user._id,
+      receiverId: req.body.receiverId
+    });
 
     await Notification.create({
       userId: req.body.receiverId,
       title: "New Interest",
-      message:
-        "Someone sent you an interest",
+      message: "Someone sent you an interest",
       type: "interest"
     });
 
+    // Send push notification
+    const recipient = await User.findById(req.body.receiverId);
+    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
+      await sendNotification({
+        userId: recipient._id,
+        tokens: recipient.fcmTokens,
+        title: "New Interest",
+        message: "Someone sent you an interest",
+        type: "interest",
+        data: { senderId: req.user._id.toString() }
+      });
+    }
+
     res.json({
       success: true,
-      message:
-        "Interest sent successfully",
+      message: "Interest sent successfully",
       data: interest
     });
   } catch (error) {
@@ -69,100 +75,118 @@ exports.sendInterest = async (
   }
 };
 
-exports.acceptInterest =
-  async (req, res) => {
-    try {
-      const interest =
-        await Interest.findById(
-          req.params.id
-        );
-
-      interest.status =
-        "Accepted";
-
-      await interest.save();
-
-      await Notification.create({
-        userId:
-          interest.senderId,
-        title:
-          "Interest Accepted",
-        message:
-          "Your interest was accepted",
-        type: "interest"
-      });
-
-      res.json({
-        success: true,
-        message:
-          "Interest accepted"
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message
-      });
-    }
-  };
-
-
-  exports.rejectInterest =
-  async (req, res) => {
-    try {
-      const interest =
-        await Interest.findById(
-          req.params.id
-        );
-
-      interest.status =
-        "Rejected";
-
-      await interest.save();
-
-      await Notification.create({
-        userId:
-          interest.senderId,
-        title:
-          "Interest Rejected",
-        message:
-          "Your interest was rejected",
-        type: "interest"
-      });
-
-      res.json({
-        success: true,
-        message:
-          "Interest rejected"
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message
-      });
-    }
-  };
-
-
-  exports.addFavorite = async (
-  req,
-  res
-) => {
+exports.acceptInterest = async (req, res) => {
   try {
-    const favorite =
-      await Favorite.create({
-        userId: req.user._id,
-        favoriteUserId:
-          req.body.userId
+    const interest = await Interest.findById(req.params.id);
+    if (!interest) {
+      return res.status(404).json({ success: false, message: "Interest not found" });
+    }
+
+    interest.status = "Accepted";
+    await interest.save();
+
+    await Notification.create({
+      userId: interest.senderId,
+      title: "Interest Accepted",
+      message: "Your interest was accepted",
+      type: "interest"
+    });
+
+    // Send push notification to the sender
+    const recipient = await User.findById(interest.senderId);
+    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
+      await sendNotification({
+        userId: recipient._id,
+        tokens: recipient.fcmTokens,
+        title: "Interest Accepted",
+        message: "Your interest was accepted",
+        type: "interest",
+        data: { interestId: interest._id.toString() }
       });
+    }
+
+    res.json({
+      success: true,
+      message: "Interest accepted"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+exports.rejectInterest = async (req, res) => {
+  try {
+    const interest = await Interest.findById(req.params.id);
+    if (!interest) {
+      return res.status(404).json({ success: false, message: "Interest not found" });
+    }
+
+    interest.status = "Rejected";
+    await interest.save();
+
+    await Notification.create({
+      userId: interest.senderId,
+      title: "Interest Rejected",
+      message: "Your interest was rejected",
+      type: "interest"
+    });
+
+    // Send push notification to the sender
+    const recipient = await User.findById(interest.senderId);
+    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
+      await sendNotification({
+        userId: recipient._id,
+        tokens: recipient.fcmTokens,
+        title: "Interest Rejected",
+        message: "Your interest was rejected",
+        type: "interest",
+        data: { interestId: interest._id.toString() }
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Interest rejected"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+exports.addFavorite = async (req, res) => {
+  try {
+    const favorite = await Favorite.create({
+      userId: req.user._id,
+      favoriteUserId: req.body.userId
+    });
 
     await Notification.create({
       userId: req.body.userId,
-      title:
-        "Added To Favorites",
-      message:
-        "Someone added your profile to favorites",
+      title: "Added To Favorites",
+      message: "Someone added your profile to favorites",
       type: "favorite"
     });
+
+    // Send push notification to the favorited user
+    const recipient = await User.findById(req.body.userId);
+    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
+      await sendNotification({
+        userId: recipient._id,
+        tokens: recipient.fcmTokens,
+        title: "Added To Favorites",
+        message: "Someone added your profile to favorites",
+        type: "favorite",
+        data: { senderId: req.user._id.toString() }
+      });
+    }
 
     res.json({
       success: true,
@@ -176,25 +200,32 @@ exports.acceptInterest =
   }
 };
 
-exports.likeProfile = async (
-  req,
-  res
-) => {
+exports.likeProfile = async (req, res) => {
   try {
-    const like =
-      await ProfileLike.create({
-        userId: req.user._id,
-        likedUserId:
-          req.body.userId
-      });
+    const like = await ProfileLike.create({
+      userId: req.user._id,
+      likedUserId: req.body.userId
+    });
 
     await Notification.create({
       userId: req.body.userId,
       title: "Profile Liked",
-      message:
-        "Someone liked your profile",
+      message: "Someone liked your profile",
       type: "like"
     });
+
+    // Send push notification to the liked user
+    const recipient = await User.findById(req.body.userId);
+    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
+      await sendNotification({
+        userId: recipient._id,
+        tokens: recipient.fcmTokens,
+        title: "Profile Liked",
+        message: "Someone liked your profile",
+        type: "like",
+        data: { senderId: req.user._id.toString() }
+      });
+    }
 
     res.json({
       success: true,

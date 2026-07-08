@@ -52,6 +52,27 @@ const UserSchema = new mongoose.Schema(
 
     annualIncome: Number,
 
+    fullName: String,
+    height: String,
+    location: String,
+    maritalStatus: String,
+    highestQualification: String,
+    country: String,
+    citizenship: String,
+    profileFor: String,
+
+    familyType: String,
+    familyValues: String,
+    fatherOccupation: String,
+    motherOccupation: String,
+    aboutFamily: String,
+
+    aboutMe: String,
+    lifeGoals: String,
+    hobbies: [String],
+    values: [String],
+    profileCompleted: Boolean,
+
     profiles: [
       {
         platform: String,
@@ -143,6 +164,21 @@ const UserSchema = new mongoose.Schema(
       type: String
     }
   ]
+    },
+
+    lifestyle: {
+      diet: String,
+      smoking: String,
+      drinking: String,
+      interests: [String]
+    },
+
+    horoscope: {
+      dateOfBirth: String,
+      timeOfBirth: String,
+      cityOfBirth: String,
+      gotra: String,
+      manglik: String
     },
     primaryProfilePhoto: {
   type: String,
