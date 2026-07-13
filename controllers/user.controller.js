@@ -3,21 +3,11 @@ const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
 const calculateMatchPercentage = require("../utils/matchPercentage");
-
 const { generateToken } = require("../utils/jwt");
-const {
-  sendNotification
-} = require(
-  "../services/notification.service"
-)
-
-
+const { sendNotification } = require("../services/notification.service");
 
 exports.createUser = async (req, res) => {
   try {
-    console.log("BODY =>", req.body);
-    console.log("FILES =>", req.files);
-
     const {
       createdFor,
       legalName,
@@ -60,26 +50,12 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    const hashPassword = await bcrypt.hash(
-      password,
-      10
-    );
+    const hashPassword = await bcrypt.hash(password, 10);
 
-    const primaryProfilePhoto =
-      req.files?.primaryProfilePhoto?.[0]?.path || null;
+    const primaryProfilePhoto = req.files?.primaryProfilePhoto?.[0]?.path || null;
+    const profilePhotos = req.files?.profilePhoto?.map((file) => file.path) || [];
+    const kundaliPhotos = req.files?.kundaliPhoto?.map((file) => file.path) || [];
 
-    const profilePhotos =
-      req.files?.profilePhoto?.map(
-        (file) => file.path
-      ) || [];
-
-    const kundaliPhotos =
-      req.files?.kundaliPhoto?.map(
-        (file) => file.path
-      ) || [];
-
-
-    console.log("Incoming FCM Token:", fcmToken);
     const user = await User.create({
       createdFor,
       legalName,
@@ -98,30 +74,14 @@ exports.createUser = async (req, res) => {
       profession,
       annualIncome,
 
-      profiles: profiles
-        ? JSON.parse(profiles)
-        : [],
-
-      familyDetails: familyDetails
-        ? JSON.parse(familyDetails)
-        : {},
-
-      partnerPreference: partnerPreference
-        ? JSON.parse(partnerPreference)
-        : {},
-
-      lifeStyleDetails: lifeStyleDetails
-        ? JSON.parse(lifeStyleDetails)
-        : {},
-
-      myStory: myStory
-        ? JSON.parse(myStory)
-        : {},
+      profiles: profiles ? JSON.parse(profiles) : [],
+      familyDetails: familyDetails ? JSON.parse(familyDetails) : {},
+      partnerPreference: partnerPreference ? JSON.parse(partnerPreference) : {},
+      lifeStyleDetails: lifeStyleDetails ? JSON.parse(lifeStyleDetails) : {},
+      myStory: myStory ? JSON.parse(myStory) : {},
 
       kundaliDetails: {
-        ...(kundaliDetails
-          ? JSON.parse(kundaliDetails)
-          : {}),
+        ...(kundaliDetails ? JSON.parse(kundaliDetails) : {}),
         kundaliPhotos
       },
 
@@ -135,44 +95,32 @@ exports.createUser = async (req, res) => {
 
       primaryProfilePhoto,
       profilePhotos,
-
       freeUsedCount: 0,
       maxFreeLimit: 5,
-
-      fcmTokens: fcmToken
-        ? [fcmToken]
-        : []
+      fcmTokens: fcmToken ? [fcmToken] : []
     });
 
-    user.profileCompletionPercentage =
-      calculateProfileCompletion(user);
-
+    user.profileCompletionPercentage = calculateProfileCompletion(user);
     await user.save();
 
-    // Send Welcome Notification (DB + FCM)
     if (user.fcmTokens?.length) {
       try {
         await sendNotification({
           userId: user._id,
           tokens: user.fcmTokens,
           title: "Welcome to We2Meet",
-          message:
-            "Your profile has been created successfully.",
+          message: "Your profile has been created successfully.",
           type: "welcome",
           data: {
             userId: user._id.toString()
           }
         });
       } catch (err) {
-        console.error(
-          "FCM Error:",
-          err.message
-        );
+        console.error("FCM Error:", err.message);
       }
     }
 
     const token = generateToken(user._id);
-
     const userObj = user.toObject();
     delete userObj.password;
 
@@ -187,7 +135,6 @@ exports.createUser = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: error.message
@@ -198,15 +145,10 @@ exports.createUser = async (req, res) => {
 exports.getRecentJoins = async (req, res) => {
   try {
     const fifteenDaysAgo = new Date();
-
-    fifteenDaysAgo.setDate(
-      fifteenDaysAgo.getDate() - 15
-    );
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
 
     const users = await User.find({
-      createdAt: {
-        $gte: fifteenDaysAgo
-      }
+      createdAt: { $gte: fifteenDaysAgo }
     })
       .select("-password")
       .sort({ createdAt: -1 });
@@ -224,7 +166,6 @@ exports.getRecentJoins = async (req, res) => {
     });
   }
 };
-
 
 exports.login = async (req, res) => {
   try {
@@ -244,10 +185,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
       return res.status(400).json({
@@ -257,9 +195,7 @@ exports.login = async (req, res) => {
     }
 
     const token = generateToken(user._id);
-
     const userObj = user.toObject();
-
     delete userObj.password;
 
     res.json({
@@ -268,8 +204,7 @@ exports.login = async (req, res) => {
       token,
       data: {
         ...userObj,
-        profileCompletionPercentage:
-          calculateProfileCompletion(user)
+        profileCompletionPercentage: calculateProfileCompletion(user)
       }
     });
   } catch (error) {
@@ -280,14 +215,9 @@ exports.login = async (req, res) => {
   }
 };
 
-
 exports.updateUser = async (req, res) => {
-    console.log("DB Name:", mongoose.connection.name);
-console.log("DB Host:", mongoose.connection.host);
   try {
-    const user = await User.findById(
-      req.params.id
-    );
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -325,8 +255,7 @@ console.log("DB Host:", mongoose.connection.host);
     });
 
     if (profiles) {
-      user.profiles =
-        JSON.parse(profiles);
+      user.profiles = JSON.parse(profiles);
     }
 
     if (familyDetails) {
@@ -378,59 +307,42 @@ console.log("DB Host:", mongoose.connection.host);
       };
     }
 
-if (
-  req.files?.primaryProfilePhoto?.[0]
-) {
- user.primaryProfilePhoto =
-req.files.primaryProfilePhoto[0].path;
-}
+    if (req.files?.primaryProfilePhoto?.[0]) {
+      user.primaryProfilePhoto = req.files.primaryProfilePhoto[0].path;
+    }
 
-   if (req.files?.profilePhoto?.length) {
-const newPhotos =
-req.files.profilePhoto.map(
-(file) => file.path
-);
+    if (req.files?.profilePhoto?.length) {
+      const newPhotos = req.files.profilePhoto.map((file) => file.path);
+      user.profilePhotos = [
+        ...(user.profilePhotos || []),
+        ...newPhotos
+      ];
+    }
 
-  user.profilePhotos = [
-    ...(user.profilePhotos || []),
-    ...newPhotos
-  ];
-}
+    if (req.files?.kundaliPhoto?.length) {
+      if (!user.kundaliDetails) {
+        user.kundaliDetails = {};
+      }
+      const newKundaliPhotos = req.files.kundaliPhoto.map((file) => file.path);
+      user.kundaliDetails.kundaliPhotos = [
+        ...(user.kundaliDetails.kundaliPhotos || []),
+        ...newKundaliPhotos
+      ];
+    }
 
-  if (req.files?.kundaliPhoto?.length) {
-  if (!user.kundaliDetails) {
-    user.kundaliDetails = {};
-  }
-
-  const newKundaliPhotos =
-req.files.kundaliPhoto.map(
-(file) => file.path
-);
-
-  user.kundaliDetails.kundaliPhotos = [
-    ...(user.kundaliDetails.kundaliPhotos || []),
-    ...newKundaliPhotos
-  ];
-}
-
-    user.profileCompletionPercentage =
-      calculateProfileCompletion(user);
-
+    user.profileCompletionPercentage = calculateProfileCompletion(user);
     await user.save();
 
     const userObj = user.toObject();
-
     delete userObj.password;
 
     return res.status(200).json({
       success: true,
-      message:
-        "Profile updated successfully",
+      message: "Profile updated successfully",
       data: userObj
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: error.message
@@ -440,26 +352,18 @@ req.files.kundaliPhoto.map(
 
 exports.getAllUsers = async (req, res) => {
   try {
-    // Checkpoint 1: Verify the function exists at the start
-    console.log("Type of calculateMatchPercentage:", typeof calculateMatchPercentage);
-
     const currentUser = await User.findById(req.user._id);
-    console.log("Checkpoint: currentUser fetched", currentUser ? "Success" : "Failed");
-
     const users = await User.find({
       _id: { $ne: req.user._id }
     }).select("-password");
-    console.log(`Checkpoint: Found ${users.length} users`);
 
     const data = users.map((user, index) => {
-      // Checkpoint 2: Log which index we are processing
       try {
         return {
           ...user.toObject(),
           matchPercentage: calculateMatchPercentage(currentUser, user)
         };
       } catch (mapError) {
-        // This will catch the error specifically inside the loop
         console.error(`Error processing user at index ${index}:`, mapError.message);
         throw mapError; 
       }
@@ -471,8 +375,6 @@ exports.getAllUsers = async (req, res) => {
     });
 
   } catch (error) {
-    // THIS LINE IS THE MOST IMPORTANT:
-    // It will print the exact file path and line number in your terminal
     console.error("FULL ERROR STACK TRACE:");
     console.error(error.stack); 
 
@@ -483,66 +385,38 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.getUserById = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user._id);
+    const user = await User.findById(req.params.id).select("-password");
 
-exports.getUserById = async (
-req,
-res
-) => {
-try {
-const currentUser =
-await User.findById(
-req.user._id
-);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
 
+    const userObj = user.toObject();
+    userObj.matchPercentage = calculateMatchPercentage(currentUser, user);
 
-const user =
-  await User.findById(
-    req.params.id
-  ).select("-password");
+    return res.json({
+      success: true,
+      data: userObj
+    });
 
-if (!user) {
-  return res.status(404).json({
-    success: false,
-    message: "User not found"
-  });
-}
-
-const userObj =
-  user.toObject();
-
-userObj.matchPercentage =
-  calculateMatchPercentage(
-    currentUser,
-    user
-  );
-
-return res.json({
-  success: true,
-  data: userObj
-});
-
-
-} catch (error) {
-return res.status(500).json({
-success: false,
-message: error.message
-});
-}
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
+exports.incrementFreeCount = async (req, res) => {
+  const user = await User.findById(req.params.id);
 
-exports.incrementFreeCount = async (
-  req,
-  res
-) => {
-  const user = await User.findById(
-    req.params.id
-  );
-
-  if (
-    user.freeUsedCount <
-    user.maxFreeLimit
-  ) {
+  if (user.freeUsedCount < user.maxFreeLimit) {
     user.freeUsedCount += 1;
     await user.save();
   }
@@ -550,9 +424,7 @@ exports.incrementFreeCount = async (
   res.json({
     success: true,
     freeUsedCount: user.freeUsedCount,
-    remaining:
-      user.maxFreeLimit -
-      user.freeUsedCount
+    remaining: user.maxFreeLimit - user.freeUsedCount
   });
 };
 
@@ -568,11 +440,7 @@ exports.changePassword = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-
-    const isMatch = await bcrypt.compare(
-      oldPassword,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -581,11 +449,7 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    user.password = await bcrypt.hash(
-      newPassword,
-      10
-    );
-
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     res.json({
@@ -603,7 +467,6 @@ exports.changePassword = async (req, res) => {
 
 exports.deactivateAccount = async (req, res) => {
   try {
-
     await User.findByIdAndUpdate(
       req.user._id,
       {
@@ -626,7 +489,6 @@ exports.deactivateAccount = async (req, res) => {
 
 exports.activateAccount = async (req, res) => {
   try {
-
     await User.findByIdAndUpdate(
       req.user._id,
       {
@@ -647,13 +509,9 @@ exports.activateAccount = async (req, res) => {
   }
 };
 
-
 exports.deleteAccount = async (req, res) => {
   try {
-
-    await User.findByIdAndDelete(
-      req.user._id
-    );
+    await User.findByIdAndDelete(req.user._id);
 
     res.json({
       success: true,

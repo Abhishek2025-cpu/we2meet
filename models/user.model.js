@@ -20,9 +20,9 @@ const UserSchema = new mongoose.Schema(
     },
 
     isActive: {
-  type: Boolean,
-  default: true
-},
+      type: Boolean,
+      default: true
+    },
 
     phone: {
       type: String,
@@ -149,21 +149,21 @@ const UserSchema = new mongoose.Schema(
     },
     
     fcmTokens: [
-  {
-    type: String
-  }
-],
+      {
+        type: String
+      }
+    ],
 
     kundaliDetails: {
       dob: Date,
       pob: String,
       gotra: String,
       manglik: Boolean,
-       kundaliPhotos: [
-    {
-      type: String
-    }
-  ]
+      kundaliPhotos: [
+        {
+          type: String
+        }
+      ]
     },
 
     lifestyle: {
@@ -180,16 +180,17 @@ const UserSchema = new mongoose.Schema(
       gotra: String,
       manglik: String
     },
+    
     primaryProfilePhoto: {
-  type: String,
-  default: null
-},
+      type: String,
+      default: null
+    },
 
- profilePhotos: [
-  {
-    type: String
-  }
-],
+    profilePhotos: [
+      {
+        type: String
+      }
+    ],
 
     profileCompletionPercentage: {
       type: Number,

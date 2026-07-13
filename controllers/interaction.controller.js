@@ -1,27 +1,10 @@
 const User = require("../models/user.model");
 const { sendNotification } = require("../services/notification.service");
-
-const Interest = require(
-  "../models/interest.model"
-);
-
-const Favorite = require(
-  "../models/favorite.model"
-);
-
-const ProfileLike = require(
-  "../models/profileLike.model"
-);
-
-const Report = require(
-  "../models/report.model"
-);
-
-const Notification = require(
-  "../models/notification.model"
-);
-
-
+const Interest = require("../models/interest.model");
+const Favorite = require("../models/favorite.model");
+const ProfileLike = require("../models/profileLike.model");
+const Report = require("../models/report.model");
+const Notification = require("../models/notification.model");
 
 exports.sendInterest = async (req, res) => {
   try {
@@ -49,7 +32,6 @@ exports.sendInterest = async (req, res) => {
       type: "interest"
     });
 
-    // Send push notification
     const recipient = await User.findById(req.body.receiverId);
     if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
       await sendNotification({
@@ -92,7 +74,6 @@ exports.acceptInterest = async (req, res) => {
       type: "interest"
     });
 
-    // Send push notification to the sender
     const recipient = await User.findById(interest.senderId);
     if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
       await sendNotification({
@@ -117,7 +98,6 @@ exports.acceptInterest = async (req, res) => {
   }
 };
 
-
 exports.rejectInterest = async (req, res) => {
   try {
     const interest = await Interest.findById(req.params.id);
@@ -135,7 +115,6 @@ exports.rejectInterest = async (req, res) => {
       type: "interest"
     });
 
-    // Send push notification to the sender
     const recipient = await User.findById(interest.senderId);
     if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
       await sendNotification({
@@ -160,7 +139,6 @@ exports.rejectInterest = async (req, res) => {
   }
 };
 
-
 exports.addFavorite = async (req, res) => {
   try {
     const favorite = await Favorite.create({
@@ -175,7 +153,6 @@ exports.addFavorite = async (req, res) => {
       type: "favorite"
     });
 
-    // Send push notification to the favorited user
     const recipient = await User.findById(req.body.userId);
     if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
       await sendNotification({
@@ -214,7 +191,6 @@ exports.likeProfile = async (req, res) => {
       type: "like"
     });
 
-    // Send push notification to the liked user
     const recipient = await User.findById(req.body.userId);
     if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
       await sendNotification({
@@ -239,52 +215,35 @@ exports.likeProfile = async (req, res) => {
   }
 };
 
-
-exports.reportProfile =
-  async (req, res) => {
-    try {
-      const report =
-        await Report.create({
-          reportedBy:
-            req.user._id,
-          reportedUser:
-            req.body.userId,
-          reason:
-            req.body.reason,
-          description:
-            req.body.description
-        });
-
-      res.json({
-        success: true,
-        message:
-          "Report submitted",
-        data: report
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message
-      });
-    }
-  };
-
-  exports.getSentInterests = async (
-  req,
-  res
-) => {
+exports.reportProfile = async (req, res) => {
   try {
-    const interests =
-      await Interest.find({
-        senderId: req.user._id
-      })
-        .populate(
-          "receiverId",
-          "legalName email phone primaryProfilePhoto"
-        )
-        .sort({
-          createdAt: -1
-        });
+    const report = await Report.create({
+      reportedBy: req.user._id,
+      reportedUser: req.body.userId,
+      reason: req.body.reason,
+      description: req.body.description
+    });
+
+    res.json({
+      success: true,
+      message: "Report submitted",
+      data: report
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.getSentInterests = async (req, res) => {
+  try {
+    const interests = await Interest.find({
+      senderId: req.user._id
+    })
+      .populate("receiverId", "legalName email phone primaryProfilePhoto")
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -299,85 +258,55 @@ exports.reportProfile =
   }
 };
 
-exports.getReceivedInterests =
-  async (req, res) => {
-    try {
-      const interests =
-        await Interest.find({
-          receiverId:
-            req.user._id
-        })
-          .populate(
-            "senderId",
-            "legalName email phone primaryProfilePhoto"
-          )
-          .sort({
-            createdAt: -1
-          });
-
-      res.json({
-        success: true,
-        count:
-          interests.length,
-        data: interests
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
-  };
-
-  exports.getFavorites =
-  async (req, res) => {
-    try {
-      const favorites =
-        await Favorite.find({
-          userId:
-            req.user._id
-        })
-          .populate(
-            "favoriteUserId",
-            "legalName email phone primaryProfilePhoto"
-          )
-          .sort({
-            createdAt: -1
-          });
-
-      res.json({
-        success: true,
-        count:
-          favorites.length,
-        data: favorites
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
-  };
-
-
-  exports.getLikes = async (
-  req,
-  res
-) => {
+exports.getReceivedInterests = async (req, res) => {
   try {
-    const likes =
-      await ProfileLike.find({
-        userId: req.user._id
-      })
-        .populate(
-          "likedUserId",
-          "legalName email phone primaryProfilePhoto"
-        )
-        .sort({
-          createdAt: -1
-        });
+    const interests = await Interest.find({
+      receiverId: req.user._id
+    })
+      .populate("senderId", "legalName email phone primaryProfilePhoto")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: interests.length,
+      data: interests
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.getFavorites = async (req, res) => {
+  try {
+    const favorites = await Favorite.find({
+      userId: req.user._id
+    })
+      .populate("favoriteUserId", "legalName email phone primaryProfilePhoto")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: favorites.length,
+      data: favorites
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.getLikes = async (req, res) => {
+  try {
+    const likes = await ProfileLike.find({
+      userId: req.user._id
+    })
+      .populate("likedUserId", "legalName email phone primaryProfilePhoto")
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -392,25 +321,12 @@ exports.getReceivedInterests =
   }
 };
 
-
-exports.getReports = async (
-  req,
-  res
-) => {
+exports.getReports = async (req, res) => {
   try {
-    const reports =
-      await Report.find()
-        .populate(
-          "reportedBy",
-          "legalName email phone"
-        )
-        .populate(
-          "reportedUser",
-          "legalName email phone"
-        )
-        .sort({
-          createdAt: -1
-        });
+    const reports = await Report.find()
+      .populate("reportedBy", "legalName email phone")
+      .populate("reportedUser", "legalName email phone")
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -425,71 +341,49 @@ exports.getReports = async (
   }
 };
 
-
-exports.removeFavorite =
-  async (req, res) => {
-    try {
-      const favorite =
-        await Favorite.findOneAndDelete(
-          {
-            _id:
-              req.params.id,
-            userId:
-              req.user._id
-          }
-        );
-
-      if (!favorite) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message:
-              "Favorite not found"
-          });
-      }
-
-      res.json({
-        success: true,
-        message:
-          "Favorite removed successfully"
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
-  };
-
-  exports.removeLike = async (
-  req,
-  res
-) => {
+exports.removeFavorite = async (req, res) => {
   try {
-    const like =
-      await ProfileLike.findOneAndDelete(
-        {
-          _id:
-            req.params.id,
-          userId:
-            req.user._id
-        }
-      );
+    const favorite = await Favorite.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
-    if (!like) {
+    if (!favorite) {
       return res.status(404).json({
         success: false,
-        message:
-          "Like not found"
+        message: "Favorite not found"
       });
     }
 
     res.json({
       success: true,
-      message:
-        "Like removed successfully"
+      message: "Favorite removed successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.removeLike = async (req, res) => {
+  try {
+    const like = await ProfileLike.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!like) {
+      return res.status(404).json({
+        success: false,
+        message: "Like not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Like removed successfully"
     });
   } catch (error) {
     res.status(500).json({
