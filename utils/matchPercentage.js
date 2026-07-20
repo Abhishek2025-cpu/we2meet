@@ -5,6 +5,42 @@ targetUser
 let score = 0;
 
 if (
+currentUser.zodiacSign &&
+currentUser.zodiacSign === targetUser.zodiacSign
+) {
+score += 5;
+}
+
+if (
+currentUser.rasi &&
+currentUser.rasi === targetUser.rasi
+) {
+score += 5;
+}
+
+if (
+currentUser.dosa &&
+currentUser.dosa === targetUser.dosa
+) {
+score += 5;
+}
+
+if (
+currentUser.weight &&
+targetUser.weight
+) {
+const diff =
+Math.abs(
+Number(currentUser.weight) -
+Number(targetUser.weight)
+);
+
+if (diff <= 10) {
+score += 2;
+}
+}
+
+if (
 currentUser.religion &&
 currentUser.religion ===
 targetUser.religion

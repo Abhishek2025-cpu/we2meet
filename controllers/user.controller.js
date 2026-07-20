@@ -8,33 +8,52 @@ const { sendNotification } = require("../services/notification.service");
 
 exports.createUser = async (req, res) => {
   try {
-    const {
-      createdFor,
-      legalName,
-      email,
-      phone,
-      password,
-      gender,
-      dob,
-      religion,
-      caste,
-      subCaste,
-      motherTongue,
-      qualification,
-      college,
-      workingWith,
-      profession,
-      annualIncome,
-      familyDetails,
-      partnerPreference,
-      lifeStyleDetails,
-      myStory,
-      kundaliDetails,
-      profiles,
-      lifestyle,
-      horoscope,
-      fcmToken
-    } = req.body;
+ const {
+createdFor,
+legalName,
+email,
+phone,
+password,
+
+gender,
+dob,
+
+religion,
+caste,
+subCaste,
+
+motherTongue,
+
+qualification,
+college,
+workingWith,
+profession,
+annualIncome,
+
+fullName,
+height,
+weight,
+location,
+maritalStatus,
+highestQualification,
+country,
+citizenship,
+profileFor,
+
+zodiacSign,
+rasi,
+dosa,
+
+familyDetails,
+partnerPreference,
+lifeStyleDetails,
+myStory,
+kundaliDetails,
+profiles,
+lifestyle,
+horoscope,
+fcmToken
+} = req.body;
 
     const exists = await User.findOne({
       $or: [
@@ -57,22 +76,40 @@ exports.createUser = async (req, res) => {
     const kundaliPhotos = req.files?.kundaliPhoto?.map((file) => file.path) || [];
 
     const user = await User.create({
-      createdFor,
-      legalName,
-      email,
-      phone,
-      password: hashPassword,
-      gender,
-      dob,
-      religion,
-      caste,
-      subCaste,
-      motherTongue,
-      qualification,
-      college,
-      workingWith,
-      profession,
-      annualIncome,
+    createdFor,
+legalName,
+email,
+phone,
+password: hashPassword,
+
+gender,
+dob,
+
+religion,
+caste,
+subCaste,
+
+motherTongue,
+
+qualification,
+college,
+workingWith,
+profession,
+annualIncome,
+
+fullName,
+height,
+weight,
+location,
+maritalStatus,
+highestQualification,
+country,
+citizenship,
+profileFor,
+
+zodiacSign,
+rasi,
+dosa,
 
       profiles: profiles ? JSON.parse(profiles) : [],
       familyDetails: familyDetails ? JSON.parse(familyDetails) : {},

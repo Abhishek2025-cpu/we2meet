@@ -54,6 +54,13 @@ const UserSchema = new mongoose.Schema(
 
     fullName: String,
     height: String,
+    weight: String,
+
+     zodiacSign: String,
+
+      rasi: String,
+
+     dosa: String,
     location: String,
     maritalStatus: String,
     highestQualification: String,
