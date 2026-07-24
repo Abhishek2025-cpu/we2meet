@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const Admin = require("../models/admin.model");
+
 const User = require("../models/user.model");
+const ReportUser = require("../models/reportUser.model");
+const BlockUser = require("../models/blockUser.model");
 
 
 const generateAdminToken = require(
@@ -429,7 +432,7 @@ exports.searchAndFilterUsers = async (req, res) => {
   }
 };
 
-const BlockUser = require("../models/blockUser.model");
+
 
 exports.getAllBlockedUsers = async (req, res) => {
   try {
