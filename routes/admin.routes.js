@@ -18,7 +18,13 @@ const {
       suspendUser,
   activateUser,
   getAllBlockedUsers,
-  searchAndFilterUsers
+  searchAndFilterUsers,
+  getAllReportedUsers,
+  getReportedUserDetails,
+  getUserBlockedList,
+  removeBlockedUser,
+  getModerationDashboard,
+
 } = require(
   "../controllers/admin.controller"
 );
@@ -99,6 +105,62 @@ router.get(
   adminProtect,
   userGrowthGraph
 );
+
+// ================================
+// Moderation Dashboard
+// ================================
+
+router.get(
+  "/moderation/dashboard",
+  adminProtect,
+  getModerationDashboard
+);
+
+// ================================
+// Reports
+// ================================
+
+// Get all reported users
+router.get(
+  "/reported-users",
+  adminProtect,
+  getAllReportedUsers
+);
+
+// Report history of a specific user
+router.get(
+  "/reported-users/:userId",
+  adminProtect,
+  getReportedUserDetails
+);
+
+// Top most reported users
+
+
+// ================================
+// Blocks
+// ================================
+
+// Users blocked by a particular user
+router.get(
+  "/users/:userId/blocked",
+  adminProtect,
+  getUserBlockedList
+);
+
+// Remove a block relation
+router.delete(
+  "/block/:blockId",
+  adminProtect,
+  removeBlockedUser
+);
+
+
+
+
+
+
+
 
 router.get(
   "/interest-analytics",

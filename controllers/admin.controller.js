@@ -509,3 +509,231 @@ exports.getAllBlockedUsers = async (req, res) => {
     });
   }
 };
+
+
+
+exports.getAllReportedUsers = async (req,res)=>{
+try{
+
+const {
+page=1,
+limit=10,
+search=""
+}=req.query;
+
+const reports=await ReportUser.find()
+.populate("reportedBy","legalName phone email")
+.populate("reportedUser","legalName phone email primaryProfilePhoto isActive")
+.sort({createdAt:-1});
+
+let data=reports;
+
+if(search){
+
+const s=search.toLowerCase();
+
+data=data.filter(item=>
+item.reportedUser?.legalName?.toLowerCase().includes(s) ||
+item.reportedUser?.phone?.includes(search) ||
+item.reportedUser?.email?.toLowerCase().includes(s)
+);
+
+}
+
+const total=data.length;
+
+const result=data.slice(
+(page-1)*limit,
+page*limit
+);
+
+return res.json({
+success:true,
+total,
+page:Number(page),
+totalPages:Math.ceil(total/limit),
+count:result.length,
+data:result
+});
+
+}catch(error){
+return res.status(500).json({
+success:false,
+message:error.message
+});
+}
+};
+
+
+exports.getReportedUserDetails=async(req,res)=>{
+
+try{
+
+const reports=await ReportUser.find({
+reportedUser:req.params.userId
+})
+.populate("reportedBy","legalName phone email")
+.sort({createdAt:-1});
+
+return res.json({
+success:true,
+reportCount:reports.length,
+data:reports
+});
+
+}catch(error){
+
+return res.status(500).json({
+success:false,
+message:error.message
+});
+
+}
+
+};
+
+exports.getUserBlockedList=async(req,res)=>{
+
+try{
+
+const data=await BlockUser.find({
+blockedBy:req.params.userId
+})
+.populate(
+"blockedUser",
+"legalName phone email primaryProfilePhoto"
+)
+.sort({createdAt:-1});
+
+return res.json({
+success:true,
+count:data.length,
+data
+});
+
+}catch(error){
+
+return res.status(500).json({
+success:false,
+message:error.message
+});
+
+}
+
+};
+
+
+exports.removeBlockedUser=async(req,res)=>{
+
+try{
+
+const block=await BlockUser.findByIdAndDelete(
+req.params.blockId
+);
+
+if(!block){
+
+return res.status(404).json({
+success:false,
+message:"Block not found"
+});
+
+}
+
+return res.json({
+success:true,
+message:"Block removed successfully"
+});
+
+}catch(error){
+
+return res.status(500).json({
+success:false,
+message:error.message
+});
+
+}
+
+};
+
+exports.getModerationDashboard=async(req,res)=>{
+
+try{
+
+const today=new Date();
+
+today.setHours(0,0,0,0);
+
+const [
+totalUsers,
+activeUsers,
+inactiveUsers,
+blockedRelations,
+reportedProfiles,
+todayBlocks,
+todayReports,
+autoSuspendedUsers
+]=await Promise.all([
+
+User.countDocuments(),
+
+User.countDocuments({
+isActive:true
+}),
+
+User.countDocuments({
+isActive:false
+}),
+
+BlockUser.countDocuments(),
+
+ReportUser.countDocuments(),
+
+BlockUser.countDocuments({
+createdAt:{$gte:today}
+}),
+
+ReportUser.countDocuments({
+createdAt:{$gte:today}
+}),
+
+User.countDocuments({
+isActive:false,
+reportCount:{
+$gte:100
+}
+})
+
+]);
+
+return res.json({
+
+success:true,
+
+data:{
+
+totalUsers,
+activeUsers,
+inactiveUsers,
+blockedRelations,
+reportedProfiles,
+todayBlocks,
+todayReports,
+autoSuspendedUsers
+
+}
+
+});
+
+}catch(error){
+
+return res.status(500).json({
+
+success:false,
+message:error.message
+
+});
+
+}
+
+};
