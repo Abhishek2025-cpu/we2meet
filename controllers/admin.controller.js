@@ -428,3 +428,84 @@ exports.searchAndFilterUsers = async (req, res) => {
     });
   }
 };
+
+const BlockUser = require("../models/blockUser.model");
+
+exports.getAllBlockedUsers = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = ""
+    } = req.query;
+
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        {
+          "blockedBy.legalName": {
+            $regex: search,
+            $options: "i"
+          }
+        },
+        {
+          "blockedUser.legalName": {
+            $regex: search,
+            $options: "i"
+          }
+        }
+      ];
+    }
+
+    const blocks = await BlockUser.find()
+      .populate(
+        "blockedBy",
+        "legalName phone email gender primaryProfilePhoto"
+      )
+      .populate(
+        "blockedUser",
+        "legalName phone email gender primaryProfilePhoto isActive"
+      )
+      .sort({ createdAt: -1 });
+
+    let data = blocks;
+
+    if (search) {
+      data = blocks.filter((item) => {
+        const blocker =
+          item.blockedBy?.legalName?.toLowerCase() || "";
+
+        const blocked =
+          item.blockedUser?.legalName?.toLowerCase() || "";
+
+        return (
+          blocker.includes(search.toLowerCase()) ||
+          blocked.includes(search.toLowerCase())
+        );
+      });
+    }
+
+    const total = data.length;
+
+    const paginated = data.slice(
+      (page - 1) * limit,
+      page * limit
+    );
+
+    return res.status(200).json({
+      success: true,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / limit),
+      count: paginated.length,
+      data: paginated
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

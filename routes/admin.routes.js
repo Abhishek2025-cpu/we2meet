@@ -1,5 +1,4 @@
 const express = require("express");
-
 const router = express.Router();
 
 const adminProtect = require(
@@ -18,6 +17,7 @@ const {
     getAllPlanClicks,
       suspendUser,
   activateUser,
+  getAllBlockedUsers,
   searchAndFilterUsers
 } = require(
   "../controllers/admin.controller"
@@ -112,7 +112,11 @@ router.get(
   planAnalytics
 );
 
-
+router.get(
+  "/blocked-users",
+  adminProtect,
+  getAllBlockedUsers
+);
 router.get(
   "/plan-clicks",
   adminProtect,
