@@ -43,6 +43,10 @@ app.use(
   )
 );
 
+app.use(
+  "/api/moderation",
+  require("./routes/userModeration.routes")
+);
 
 const successStoryRoutes =
   require("./routes/successStory.routes");

@@ -5,6 +5,7 @@ const calculateProfileCompletion = require("../utils/profileCompletion");
 const calculateMatchPercentage = require("../utils/matchPercentage");
 const { generateToken } = require("../utils/jwt");
 const { sendNotification } = require("../services/notification.service");
+const BlockedUser = require("../models/blockUser.model");
 
 exports.createUser = async (req, res) => {
   try {
@@ -389,43 +390,100 @@ exports.updateUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
+
     const currentUser = await User.findById(req.user._id);
+
+    // Users blocked by me
+    const blockedByMe = await BlockedUser.find({
+      blockedBy: req.user._id
+    }).select("blockedUser");
+
+    // Users who blocked me
+    const blockedMe = await BlockedUser.find({
+      blockedUser: req.user._id
+    }).select("blockedBy");
+
+    const excludedIds = [
+      req.user._id,
+      ...blockedByMe.map(item => item.blockedUser),
+      ...blockedMe.map(item => item.blockedBy)
+    ];
+
     const users = await User.find({
-      _id: { $ne: req.user._id }
+      _id: {
+        $nin: excludedIds
+      },
+      isActive: true
     }).select("-password");
 
     const data = users.map((user, index) => {
       try {
         return {
           ...user.toObject(),
-          matchPercentage: calculateMatchPercentage(currentUser, user)
+          matchPercentage: calculateMatchPercentage(
+            currentUser,
+            user
+          )
         };
       } catch (mapError) {
-        console.error(`Error processing user at index ${index}:`, mapError.message);
-        throw mapError; 
+        console.error(
+          `Error processing user at index ${index}:`,
+          mapError.message
+        );
+        throw mapError;
       }
     });
 
     return res.json({
       success: true,
+      count: data.length,
       data
     });
 
   } catch (error) {
-    console.error("FULL ERROR STACK TRACE:");
-    console.error(error.stack); 
+
+    console.error(error);
 
     return res.status(500).json({
       success: false,
       message: error.message
     });
+
   }
 };
 
 exports.getUserById = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user._id);
-    const user = await User.findById(req.params.id).select("-password");
+
+    const currentUser = await User.findById(
+      req.user._id
+    );
+
+    const blocked = await BlockedUser.findOne({
+      $or: [
+        {
+          blockedBy: req.user._id,
+          blockedUser: req.params.id
+        },
+        {
+          blockedBy: req.params.id,
+          blockedUser: req.user._id
+        }
+      ]
+    });
+
+    if (blocked) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "This profile is not available."
+      });
+    }
+
+    const user = await User.findOne({
+      _id: req.params.id,
+      isActive: true
+    }).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -435,7 +493,12 @@ exports.getUserById = async (req, res) => {
     }
 
     const userObj = user.toObject();
-    userObj.matchPercentage = calculateMatchPercentage(currentUser, user);
+
+    userObj.matchPercentage =
+      calculateMatchPercentage(
+        currentUser,
+        user
+      );
 
     return res.json({
       success: true,
@@ -443,10 +506,12 @@ exports.getUserById = async (req, res) => {
     });
 
   } catch (error) {
+
     return res.status(500).json({
       success: false,
       message: error.message
     });
+
   }
 };
 
