@@ -24,6 +24,8 @@ const {
   getUserBlockedList,
   removeBlockedUser,
   getModerationDashboard,
+   getActiveUsers,
+  getDeactivatedUsers
 
 } = require(
   "../controllers/admin.controller"
@@ -183,6 +185,20 @@ router.get(
   "/plan-clicks",
   adminProtect,
   getAllPlanClicks
+);
+
+// Active Users
+router.get(
+  "/active-users",
+  adminProtect,
+  getActiveUsers
+);
+
+// Deactivated Users
+router.get(
+  "/deactivated-users",
+  adminProtect,
+  getDeactivatedUsers
 );
 
 
