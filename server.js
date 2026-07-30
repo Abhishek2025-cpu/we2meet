@@ -57,6 +57,12 @@ app.use(
 );
 
 app.use(
+  "/api/photo-access",
+  require("./routes/photoAccess.routes")
+);
+
+
+app.use(
   "/api/users",
   require("./routes/user.routes")
 );
