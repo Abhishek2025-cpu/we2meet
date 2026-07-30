@@ -49,6 +49,13 @@ router.post("/login", login);
 // Protected Routes
 // ==========================
 
+router.patch(
+  "/photo-visibility",
+  protect,
+  togglePhotoVisibility
+);
+
+
 router.get(
   "/",
   protect,
@@ -120,11 +127,6 @@ router.patch(
   updateUser
 );
 
-router.patch(
-  "/photo-visibility",
-  protect,
-  togglePhotoVisibility
-);
 
 router.get(
   "/:id",

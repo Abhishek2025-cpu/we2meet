@@ -630,6 +630,8 @@ exports.deleteAccount = async (req, res) => {
 
 
 exports.togglePhotoVisibility = async (req, res) => {
+    console.log("==== PHOTO VISIBILITY API HIT ====");
+  console.log(req.originalUrl);
   try {
     const { visibility } = req.body;
 
