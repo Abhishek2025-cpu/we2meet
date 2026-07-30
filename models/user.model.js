@@ -209,6 +209,12 @@ const UserSchema = new mongoose.Schema(
       default: 0
     },
 
+    photoVisibility: {
+  type: String,
+  enum: ["public", "private"],
+  default: "private"
+},
+
     maxFreeLimit: {
       type: Number,
       default: 5

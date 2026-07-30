@@ -627,3 +627,41 @@ exports.deleteAccount = async (req, res) => {
     });
   }
 };
+
+
+exports.togglePhotoVisibility = async (req, res) => {
+  try {
+    const { visibility } = req.body;
+
+    if (!["public", "private"].includes(visibility)) {
+      return res.status(400).json({
+        success: false,
+        message: "Visibility must be public or private"
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        photoVisibility: visibility
+      },
+      {
+        new: true
+      }
+    ).select("photoVisibility");
+
+    return res.status(200).json({
+      success: true,
+      message: `Photos are now ${visibility}.`,
+      data: user
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};

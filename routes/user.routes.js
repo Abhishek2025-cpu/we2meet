@@ -16,7 +16,8 @@ const {
   changePassword,
   deactivateAccount,
   activateAccount,
-  deleteAccount
+  deleteAccount,
+  togglePhotoVisibility
 } = require("../controllers/user.controller");
 
 // ==========================
@@ -117,6 +118,12 @@ router.patch(
     }
   ]),
   updateUser
+);
+
+router.patch(
+  "/photo-visibility",
+  protect,
+  togglePhotoVisibility
 );
 
 router.get(
