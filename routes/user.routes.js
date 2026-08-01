@@ -17,7 +17,9 @@ const {
   deactivateAccount,
   activateAccount,
   deleteAccount,
-  togglePhotoVisibility
+  togglePhotoVisibility,
+  toggleContactVisibility,
+  getContactVisibility
 } = require("../controllers/user.controller");
 
 // ==========================
@@ -54,6 +56,19 @@ router.patch(
   protect,
   togglePhotoVisibility
 );
+
+router.patch(
+  "/contact-visibility",
+  protect,
+  toggleContactVisibility
+);
+
+router.get(
+  "/contact-visibility",
+  protect,
+  getContactVisibility
+);
+
 
 
 router.get(

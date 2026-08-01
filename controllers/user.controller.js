@@ -416,23 +416,53 @@ exports.getAllUsers = async (req, res) => {
       isActive: true
     }).select("-password");
 
-    const data = users.map((user, index) => {
-      try {
-        return {
-          ...user.toObject(),
-          matchPercentage: calculateMatchPercentage(
+    const data = await Promise.all(
+      users.map(async (user) => {
+
+        const userObj = user.toObject();
+
+        userObj.matchPercentage =
+          calculateMatchPercentage(
             currentUser,
             user
-          )
-        };
-      } catch (mapError) {
-        console.error(
-          `Error processing user at index ${index}:`,
-          mapError.message
-        );
-        throw mapError;
-      }
-    });
+          );
+
+        // ============================
+        // PHOTO PRIVACY
+        // ============================
+
+        if (
+          user.photoVisibility === "private"
+        ) {
+
+          const approvedRequest =
+            await PhotoAccessRequest.findOne({
+              requestedBy: req.user._id,
+              requestedTo: user._id,
+              status: "approved"
+            });
+
+          if (!approvedRequest) {
+            userObj.profilePhotos = [];
+            userObj.primaryProfilePhoto = null;
+          }
+        }
+
+        // ============================
+        // CONTACT PRIVACY
+        // ============================
+
+        if (
+          user.contactVisibility === "private"
+        ) {
+          userObj.phone = null;
+          userObj.email = null;
+        }
+
+        return userObj;
+
+      })
+    );
 
     return res.json({
       success: true,
@@ -499,6 +529,40 @@ exports.getUserById = async (req, res) => {
         currentUser,
         user
       );
+
+    // ============================
+    // PHOTO PRIVACY
+    // ============================
+
+    if (
+      user.photoVisibility === "private" &&
+      String(user._id) !== String(req.user._id)
+    ) {
+
+      const approvedRequest =
+        await PhotoAccessRequest.findOne({
+          requestedBy: req.user._id,
+          requestedTo: user._id,
+          status: "approved"
+        });
+
+      if (!approvedRequest) {
+        userObj.profilePhotos = [];
+        userObj.primaryProfilePhoto = null;
+      }
+    }
+
+    // ============================
+    // CONTACT PRIVACY
+    // ============================
+
+    if (
+      user.contactVisibility === "private" &&
+      String(user._id) !== String(req.user._id)
+    ) {
+      userObj.phone = null;
+      userObj.email = null;
+    }
 
     return res.json({
       success: true,
@@ -655,6 +719,65 @@ exports.togglePhotoVisibility = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: `Photos are now ${visibility}.`,
+      data: user
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+
+exports.toggleContactVisibility = async (req, res) => {
+  try {
+    const { visibility } = req.body;
+
+    if (!["public", "private"].includes(visibility)) {
+      return res.status(400).json({
+        success: false,
+        message: "Visibility must be public or private"
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        contactVisibility: visibility
+      },
+      {
+        new: true
+      }
+    ).select("contactVisibility");
+
+    return res.status(200).json({
+      success: true,
+      message: `Contact visibility is now ${visibility}.`,
+      data: user
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+exports.getContactVisibility = async (req, res) => {
+  try {
+
+    const user = await User.findById(req.user._id)
+      .select("contactVisibility");
+
+    return res.status(200).json({
+      success: true,
       data: user
     });
 
