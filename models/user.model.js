@@ -100,47 +100,50 @@ const UserSchema = new mongoose.Schema(
       aboutFamily: String
     },
 
-    partnerPreference: {
-      ageRange: {
-        min: Number,
-        max: Number
-      },
+   partnerPreference: {
+  ageRange: {
+    min: Number,
+    max: Number
+  },
 
-      heightRange: {
-        min: Number,
-        max: Number
-      },
+  heightRange: {
+    min: Number,
+    max: Number
+  },
 
-      maritalStatus: [String],
+  maritalStatus: [String],
 
-      religions: [String],
+  religions: [String],
 
-      motherTongues: [String],
+  motherTongues: [String],
 
-      castes: [String],
+  castes: [String],
 
-      qualifications: [String],
+  qualifications: [String],
 
-      workingWith: [String],
+  workingWith: [String],
 
-      professions: [String],
+  professions: [String],
 
-      annualIncomeMin: Number,
-      annualIncomeMax: Number,
+  // NEW
+  locations: [String],
 
-      dietaryPreference: [String],
+  annualIncomeMin: Number,
+  annualIncomeMax: Number,
 
-      smoking: Boolean,
-      drinking: Boolean,
+  dietaryPreference: [String],
 
-      familyStatus: [String],
-      familyType: [String],
-      familyValues: [String],
+  smoking: Boolean,
+  drinking: Boolean,
 
-      manglik: Boolean,
+  familyStatus: [String],
+  familyType: [String],
+  familyValues: [String],
 
-      gender: String
-    },
+  manglik: Boolean,
+
+  gender: String
+},
 
     lifeStyleDetails: {
       dietaryPreference: [String],
