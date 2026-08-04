@@ -6,6 +6,7 @@ const calculateMatchPercentage = require("../utils/matchPercentage");
 const { generateToken } = require("../utils/jwt");
 const { sendNotification } = require("../services/notification.service");
 const BlockedUser = require("../models/blockUser.model");
+const PhotoAccessRequest = require("../models/photoAccessRequest.model");
 
 exports.createUser = async (req, res) => {
   try {
