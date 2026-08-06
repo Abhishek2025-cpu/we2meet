@@ -3,7 +3,12 @@ const cloudinary = require("../config/cloudinary");
 
 exports.createSuccessStory = async (req, res) => {
   try {
-    const { userId, story } = req.body;
+
+    const {
+      partnerName,
+      meetingDate,
+      story
+    } = req.body;
 
     if (!req.file) {
       return res.status(400).json({
@@ -12,16 +17,38 @@ exports.createSuccessStory = async (req, res) => {
       });
     }
 
+    const user = await User.findById(req.user._id)
+      .select("legalName");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
     const successStory = await SuccessStory.create({
-      userId,
+
+      userId: req.user._id,
+
+      partnerName,
+
+      coupleName: `${user.legalName} & ${partnerName}`,
+
+      meetingDate,
+
       story,
-      image: req.file.path // Cloudinary URL
+
+      image: req.file.path
+
     });
 
     return res.status(201).json({
+
       success: true,
       message: "Success story created successfully",
       data: successStory
+
     });
 
   } catch (error) {
@@ -105,13 +132,33 @@ exports.updateSuccessStory = async (req, res) => {
       });
     }
 
+    if (!story.userId.equals(req.user._id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const user = await User.findById(req.user._id)
+      .select("legalName");
+
+    if (req.body.partnerName) {
+      story.partnerName = req.body.partnerName;
+    }
+
+    if (req.body.meetingDate) {
+      story.meetingDate = req.body.meetingDate;
+    }
+
     if (req.body.story) {
       story.story = req.body.story;
     }
 
+    story.coupleName =
+      `${user.legalName} & ${story.partnerName}`;
+
     if (req.file) {
 
-      // Delete old Cloudinary image (optional)
       if (story.image) {
         try {
 
@@ -124,11 +171,11 @@ exports.updateSuccessStory = async (req, res) => {
           await cloudinary.uploader.destroy(publicId);
 
         } catch (err) {
-          console.log("Old image delete failed:", err.message);
+          console.log(err.message);
         }
       }
 
-      story.image = req.file.path; // New Cloudinary URL
+      story.image = req.file.path;
     }
 
     await story.save();
