@@ -1,6 +1,6 @@
 const SuccessStory = require("../models/successStory.model");
+const User = require("../models/user.model");
 const cloudinary = require("../config/cloudinary");
-
 exports.createSuccessStory = async (req, res) => {
   try {
 
