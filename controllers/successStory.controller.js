@@ -1,143 +1,198 @@
-const SuccessStory = require(
-  "../models/successStory.model"
-);
+const SuccessStory = require("../models/successStory.model");
+const cloudinary = require("../config/cloudinary");
 
-exports.createSuccessStory =
-  async (req, res) => {
-    try {
-      const { userId, story } =
-        req.body;
+exports.createSuccessStory = async (req, res) => {
+  try {
+    const { userId, story } = req.body;
 
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Image is required"
-        });
-      }
-
-      const image =
-        `${process.env.BASE_URL}/uploads/profile/${req.file.filename}`;
-
-      const successStory =
-        await SuccessStory.create({
-          userId,
-          story,
-          image
-        });
-
-      res.status(201).json({
-        success: true,
-        message:
-          "Success story created successfully",
-        data: successStory
-      });
-    } catch (error) {
-      res.status(500).json({
+    if (!req.file) {
+      return res.status(400).json({
         success: false,
-        message: error.message
+        message: "Image is required"
       });
     }
-  };
 
-  exports.getAllSuccessStories =
-  async (req, res) => {
-    try {
-      const stories =
-        await SuccessStory.find()
-          .populate(
-            "userId",
-            "legalName profilePhotos"
-          )
-          .sort({
-            createdAt: -1
-          });
+    const successStory = await SuccessStory.create({
+      userId,
+      story,
+      image: req.file.path // Cloudinary URL
+    });
 
-      res.json({
-        success: true,
-        count: stories.length,
-        data: stories
+    return res.status(201).json({
+      success: true,
+      message: "Success story created successfully",
+      data: successStory
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+exports.getAllSuccessStories = async (req, res) => {
+  try {
+
+    const stories = await SuccessStory.find()
+      .populate(
+        "userId",
+        "legalName profilePhotos primaryProfilePhoto"
+      )
+      .sort({
+        createdAt: -1
       });
-    } catch (error) {
-      res.status(500).json({
+
+    return res.json({
+      success: true,
+      count: stories.length,
+      data: stories
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+exports.getSuccessStoryById = async (req, res) => {
+  try {
+
+    const story = await SuccessStory.findById(req.params.id)
+      .populate(
+        "userId",
+        "legalName profilePhotos primaryProfilePhoto"
+      );
+
+    if (!story) {
+      return res.status(404).json({
         success: false,
-        message: error.message
+        message: "Story not found"
       });
     }
-  };
 
-  exports.getSuccessStoryById =
-  async (req, res) => {
-    try {
-      const story =
-        await SuccessStory.findById(
-          req.params.id
-        ).populate(
-          "userId",
-          "legalName profilePhotos"
-        );
+    return res.json({
+      success: true,
+      data: story
+    });
 
-      if (!story) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Story not found"
-        });
-      }
+  } catch (error) {
 
-      res.json({
-        success: true,
-        data: story
-      });
-    } catch (error) {
-      res.status(500).json({
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+exports.updateSuccessStory = async (req, res) => {
+  try {
+
+    const story = await SuccessStory.findById(req.params.id);
+
+    if (!story) {
+      return res.status(404).json({
         success: false,
-        message: error.message
+        message: "Story not found"
       });
     }
-  };
 
-  exports.updateSuccessStory =
-  async (req, res) => {
-    try {
-      const story =
-        await SuccessStory.findById(
-          req.params.id
-        );
+    if (req.body.story) {
+      story.story = req.body.story;
+    }
 
-      if (!story) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Story not found"
-        });
+    if (req.file) {
+
+      // Delete old Cloudinary image (optional)
+      if (story.image) {
+        try {
+
+          const publicId = story.image
+            .split("/")
+            .slice(-2)
+            .join("/")
+            .replace(/\.[^/.]+$/, "");
+
+          await cloudinary.uploader.destroy(publicId);
+
+        } catch (err) {
+          console.log("Old image delete failed:", err.message);
+        }
       }
 
-      if (req.body.story) {
-        story.story =
-          req.body.story;
-      }
+      story.image = req.file.path; // New Cloudinary URL
+    }
 
-      if (req.file) {
-        story.image =
-          `${process.env.BASE_URL}/uploads/profile/${req.file.filename}`;
-      }
+    await story.save();
 
-      await story.save();
+    return res.json({
+      success: true,
+      message: "Success story updated successfully",
+      data: story
+    });
 
-      res.json({
-        success: true,
-        message:
-          "Success story updated",
-        data: story
-      });
-    } catch (error) {
-      res.status(500).json({
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+exports.deleteSuccessStory = async (req, res) => {
+  try {
+
+    const story = await SuccessStory.findById(req.params.id);
+
+    if (!story) {
+      return res.status(404).json({
         success: false,
-        message: error.message
+        message: "Story not found"
       });
     }
-  };
+
+    if (story.image) {
+      try {
+
+        const publicId = story.image
+          .split("/")
+          .slice(-2)
+          .join("/")
+          .replace(/\.[^/.]+$/, "");
+
+        await cloudinary.uploader.destroy(publicId);
+
+      } catch (err) {
+        console.log("Cloudinary delete failed:", err.message);
+      }
+    }
+
+    await SuccessStory.findByIdAndDelete(req.params.id);
+
+    return res.json({
+      success: true,
+      message: "Success story deleted successfully"
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
 
 
 
