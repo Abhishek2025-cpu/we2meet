@@ -6,11 +6,15 @@ const {
 
 const admin = require("firebase-admin");
 
-const serviceAccount = require(
-  "../we2meet-3c7d1-firebase-adminsdk-fbsvc-3432fa6b2e.json"
-);
-
 if (!getApps().length) {
+  const serviceAccount = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY
+      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+      : undefined
+  };
+
   initializeApp({
     credential: cert(serviceAccount)
   });
