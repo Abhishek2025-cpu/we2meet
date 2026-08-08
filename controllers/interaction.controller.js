@@ -25,24 +25,15 @@ exports.sendInterest = async (req, res) => {
       receiverId: req.body.receiverId
     });
 
-    await Notification.create({
+    const recipient = await User.findById(req.body.receiverId);
+    await sendNotification({
       userId: req.body.receiverId,
+      tokens: recipient?.fcmTokens || [],
       title: "New Interest",
       message: "Someone sent you an interest",
-      type: "interest"
+      type: "interest",
+      data: { senderId: req.user._id.toString() }
     });
-
-    const recipient = await User.findById(req.body.receiverId);
-    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
-      await sendNotification({
-        userId: recipient._id,
-        tokens: recipient.fcmTokens,
-        title: "New Interest",
-        message: "Someone sent you an interest",
-        type: "interest",
-        data: { senderId: req.user._id.toString() }
-      });
-    }
 
     res.json({
       success: true,
@@ -67,24 +58,15 @@ exports.acceptInterest = async (req, res) => {
     interest.status = "Accepted";
     await interest.save();
 
-    await Notification.create({
+    const recipient = await User.findById(interest.senderId);
+    await sendNotification({
       userId: interest.senderId,
+      tokens: recipient?.fcmTokens || [],
       title: "Interest Accepted",
       message: "Your interest was accepted",
-      type: "interest"
+      type: "interest",
+      data: { interestId: interest._id.toString() }
     });
-
-    const recipient = await User.findById(interest.senderId);
-    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
-      await sendNotification({
-        userId: recipient._id,
-        tokens: recipient.fcmTokens,
-        title: "Interest Accepted",
-        message: "Your interest was accepted",
-        type: "interest",
-        data: { interestId: interest._id.toString() }
-      });
-    }
 
     res.json({
       success: true,
@@ -108,24 +90,15 @@ exports.rejectInterest = async (req, res) => {
     interest.status = "Rejected";
     await interest.save();
 
-    await Notification.create({
+    const recipient = await User.findById(interest.senderId);
+    await sendNotification({
       userId: interest.senderId,
+      tokens: recipient?.fcmTokens || [],
       title: "Interest Rejected",
       message: "Your interest was rejected",
-      type: "interest"
+      type: "interest",
+      data: { interestId: interest._id.toString() }
     });
-
-    const recipient = await User.findById(interest.senderId);
-    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
-      await sendNotification({
-        userId: recipient._id,
-        tokens: recipient.fcmTokens,
-        title: "Interest Rejected",
-        message: "Your interest was rejected",
-        type: "interest",
-        data: { interestId: interest._id.toString() }
-      });
-    }
 
     res.json({
       success: true,
@@ -146,24 +119,15 @@ exports.addFavorite = async (req, res) => {
       favoriteUserId: req.body.userId
     });
 
-    await Notification.create({
+    const recipient = await User.findById(req.body.userId);
+    await sendNotification({
       userId: req.body.userId,
+      tokens: recipient?.fcmTokens || [],
       title: "Added To Favorites",
       message: "Someone added your profile to favorites",
-      type: "favorite"
+      type: "favorite",
+      data: { senderId: req.user._id.toString() }
     });
-
-    const recipient = await User.findById(req.body.userId);
-    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
-      await sendNotification({
-        userId: recipient._id,
-        tokens: recipient.fcmTokens,
-        title: "Added To Favorites",
-        message: "Someone added your profile to favorites",
-        type: "favorite",
-        data: { senderId: req.user._id.toString() }
-      });
-    }
 
     res.json({
       success: true,
@@ -184,24 +148,15 @@ exports.likeProfile = async (req, res) => {
       likedUserId: req.body.userId
     });
 
-    await Notification.create({
+    const recipient = await User.findById(req.body.userId);
+    await sendNotification({
       userId: req.body.userId,
+      tokens: recipient?.fcmTokens || [],
       title: "Profile Liked",
       message: "Someone liked your profile",
-      type: "like"
+      type: "like",
+      data: { senderId: req.user._id.toString() }
     });
-
-    const recipient = await User.findById(req.body.userId);
-    if (recipient && recipient.fcmTokens && recipient.fcmTokens.length > 0) {
-      await sendNotification({
-        userId: recipient._id,
-        tokens: recipient.fcmTokens,
-        title: "Profile Liked",
-        message: "Someone liked your profile",
-        type: "like",
-        data: { senderId: req.user._id.toString() }
-      });
-    }
 
     res.json({
       success: true,

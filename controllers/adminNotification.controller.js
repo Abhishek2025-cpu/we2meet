@@ -35,8 +35,9 @@ exports.sendPlanNotification = async (req, res) => {
     let pushSent = 0;
 
     for (const user of users) {
-      await Notification.create({
+      await sendNotification({
         userId: user._id,
+        tokens: user.fcmTokens || [],
         title,
         message,
         image,
@@ -47,18 +48,6 @@ exports.sendPlanNotification = async (req, res) => {
       });
 
       if (user.fcmTokens && user.fcmTokens.length) {
-        await sendNotification({
-          userId: user._id,
-          tokens: user.fcmTokens,
-          title,
-          message,
-          image,
-          type: "plan_notification",
-          data: {
-            planId
-          }
-        });
-
         pushSent++;
       }
     }
@@ -111,8 +100,9 @@ exports.sendGenderNotification = async (req, res) => {
     let pushSent = 0;
 
     for (const user of users) {
-      await Notification.create({
+      await sendNotification({
         userId: user._id,
+        tokens: user.fcmTokens || [],
         title,
         message,
         image,
@@ -123,18 +113,6 @@ exports.sendGenderNotification = async (req, res) => {
       });
 
       if (user.fcmTokens && user.fcmTokens.length) {
-        await sendNotification({
-          userId: user._id,
-          tokens: user.fcmTokens,
-          title,
-          message,
-          image,
-          type: "gender_notification",
-          data: {
-            gender
-          }
-        });
-
         pushSent++;
       }
     }

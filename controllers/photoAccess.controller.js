@@ -75,40 +75,16 @@ exports.requestPhotoAccess = async (
         requestedTo
       });
 
-    await Notification.create({
+    await sendNotification({
       userId: requestedTo,
-      title:
-        "Photo Access Request",
-      message:
-        `${req.user.legalName} requested access to your photos.`,
-      type:
-        "photo_access_request",
+      tokens: user?.fcmTokens || [],
+      title: "Photo Access Request",
+      message: `${req.user.legalName} requested access to your photos.`,
+      type: "photo_access_request",
       data: {
-        requestId:
-          request._id.toString()
+        requestId: request._id.toString()
       }
     });
-
-    if (
-      user.fcmTokens?.length
-    ) {
-      await sendNotification({
-        userId:
-          requestedTo,
-        tokens:
-          user.fcmTokens,
-        title:
-          "Photo Access Request",
-        message:
-          `${req.user.legalName} requested access to your photos.`,
-        type:
-          "photo_access_request",
-        data: {
-          requestId:
-            request._id.toString()
-        }
-      });
-    }
 
     return res.json({
       success: true,
@@ -256,33 +232,13 @@ exports.approveRequest =
           request.requestedBy
         );
 
-      await Notification.create({
-        userId:
-          sender._id,
-        title:
-          "Photo Request Approved",
-        message:
-          "Your request has been approved.",
-        type:
-          "photo_access_approved"
+      await sendNotification({
+        userId: sender._id,
+        tokens: sender?.fcmTokens || [],
+        title: "Photo Request Approved",
+        message: "Your request has been approved.",
+        type: "photo_access_approved"
       });
-
-      if (
-        sender.fcmTokens?.length
-      ) {
-        await sendNotification({
-          userId:
-            sender._id,
-          tokens:
-            sender.fcmTokens,
-          title:
-            "Photo Request Approved",
-          message:
-            "Your request has been approved.",
-          type:
-            "photo_access_approved"
-        });
-      }
 
       return res.json({
         success: true,
