@@ -242,6 +242,7 @@ exports.getFavorites = async (req, res) => {
       .populate("favoriteUserId", "legalName email phone primaryProfilePhoto")
       .sort({ createdAt: -1 });
 
+
     res.json({
       success: true,
       count: favorites.length,
