@@ -1,6 +1,53 @@
 const ProfileView = require(
   "../models/profileView.model"
 );
+const PhotoAccessRequest = require(
+  "../models/photoAccessRequest.model"
+);
+
+const hidePrivatePhotosWithoutAccess = async (
+  profile,
+  currentUserId
+) => {
+  if (
+    !profile ||
+    profile.photoVisibility !== "private" ||
+    String(profile._id) === String(currentUserId)
+  ) {
+    return profile;
+  }
+
+  const approvedRequest =
+    await PhotoAccessRequest.findOne({
+      requestedBy: currentUserId,
+      requestedTo: profile._id,
+      status: "approved"
+    });
+
+  if (!approvedRequest) {
+    profile.profilePhotos = [];
+    profile.primaryProfilePhoto = null;
+  }
+
+  return profile;
+};
+
+const applyPhotoPrivacyToViews = async (
+  views,
+  profileField,
+  currentUserId
+) => Promise.all(
+  views.map(async (view) => {
+    const viewObj = view.toObject();
+
+    await hidePrivatePhotosWithoutAccess(
+      viewObj[profileField],
+      currentUserId
+    );
+
+    return viewObj;
+  })
+);
 
 exports.addProfileView =
   async (req, res) => {
@@ -78,10 +125,16 @@ exports.addProfileView =
             lastViewedAt: -1
           });
 
+      const data = await applyPhotoPrivacyToViews(
+        views,
+        "viewerId",
+        req.user._id
+      );
+
       res.json({
         success: true,
-        count: views.length,
-        data: views
+        count: data.length,
+        data
       });
     } catch (error) {
       res.status(500).json({
@@ -108,10 +161,16 @@ exports.addProfileView =
             lastViewedAt: -1
           });
 
+      const data = await applyPhotoPrivacyToViews(
+        views,
+        "viewedUserId",
+        req.user._id
+      );
+
       res.json({
         success: true,
-        count: views.length,
-        data: views
+        count: data.length,
+        data
       });
     } catch (error) {
       res.status(500).json({
@@ -149,10 +208,16 @@ exports.addProfileView =
             lastViewedAt: -1
           });
 
+      const data = await applyPhotoPrivacyToViews(
+        views,
+        "viewerId",
+        req.user._id
+      );
+
       res.json({
         success: true,
-        count: views.length,
-        data: views
+        count: data.length,
+        data
       });
     } catch (error) {
       res.status(500).json({
