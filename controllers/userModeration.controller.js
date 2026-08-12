@@ -157,7 +157,7 @@ exports.getBlockedUsers = async (req, res) => {
       })
       .populate(
         "blockedUser",
-        "legalName primaryProfilePhoto phone gender profession"
+        "legalName primaryProfilePhoto photoVisibility phone gender profession"
       )
       .sort({
         createdAt: -1
