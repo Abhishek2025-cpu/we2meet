@@ -197,7 +197,7 @@ exports.getSentInterests = async (req, res) => {
     const interests = await Interest.find({
       senderId: req.user._id
     })
-      .populate("receiverId", "legalName email phone primaryProfilePhoto")
+      .populate("receiverId", "legalName email phone primaryProfilePhoto photoVisibility")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -218,7 +218,7 @@ exports.getReceivedInterests = async (req, res) => {
     const interests = await Interest.find({
       receiverId: req.user._id
     })
-      .populate("senderId", "legalName email phone primaryProfilePhoto")
+      .populate("senderId", "legalName email phone primaryProfilePhoto photoVisibility")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -239,7 +239,7 @@ exports.getFavorites = async (req, res) => {
     const favorites = await Favorite.find({
       userId: req.user._id
     })
-      .populate("favoriteUserId", "legalName email phone primaryProfilePhoto")
+      .populate("favoriteUserId", "legalName email phone primaryProfilePhoto photoVisibility")
       .sort({ createdAt: -1 });
 
     res.json({
