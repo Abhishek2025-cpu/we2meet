@@ -25,7 +25,8 @@ const {
   removeBlockedUser,
   getModerationDashboard,
    getActiveUsers,
-  getDeactivatedUsers
+  getDeactivatedUsers,
+  createUserFromAdmin
 
 } = require(
   "../controllers/admin.controller"
@@ -47,6 +48,12 @@ router.post(
 router.post(
   "/login",
   adminLogin
+);
+
+router.post(
+  "/users",
+  adminProtect,
+  createUserFromAdmin
 );
 
 router.get(
