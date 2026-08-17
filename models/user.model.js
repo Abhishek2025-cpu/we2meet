@@ -215,13 +215,13 @@ const UserSchema = new mongoose.Schema(
     photoVisibility: {
   type: String,
   enum: ["public", "private"],
-  default: "private"
+  default: "public"
 },
 
 contactVisibility: {
   type: String,
   enum: ["public", "private"],
-  default: "private"
+  default: "public"
 },
 
 
