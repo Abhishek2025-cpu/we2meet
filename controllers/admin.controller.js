@@ -10,6 +10,8 @@ const generateAdminToken = require(
   "../utils/adminToken"
 );
 
+const calculateProfileCompletion = require("../utils/profileCompletion");
+
 exports.getAllPlanClicks = async (req, res) => {
   try {
     const data = await PlanInterest.find()
@@ -214,7 +216,7 @@ exports.getAllUsersAdmin =
   };
 
 
-  exports.getUserByIdAdmin =
+exports.getUserByIdAdmin =
   async (req, res) => {
     try {
       const user =
@@ -235,7 +237,7 @@ exports.getAllUsersAdmin =
   };
 
 
-  exports.deleteUserAdmin =
+exports.deleteUserAdmin =
   async (req, res) => {
     try {
       await User.findByIdAndDelete(
@@ -256,7 +258,7 @@ exports.getAllUsersAdmin =
   };
 
 
-  exports.getAllAdmins = async (
+exports.getAllAdmins = async (
   req,
   res
 ) => {
@@ -515,229 +517,229 @@ exports.getAllBlockedUsers = async (req, res) => {
 
 
 
-exports.getAllReportedUsers = async (req,res)=>{
-try{
+exports.getAllReportedUsers = async (req, res) => {
+  try {
 
-const {
-page=1,
-limit=10,
-search=""
-}=req.query;
+    const {
+      page = 1,
+      limit = 10,
+      search = ""
+    } = req.query;
 
-const reports=await ReportUser.find()
-.populate("reportedBy","legalName phone email")
-.populate("reportedUser","legalName phone email primaryProfilePhoto isActive")
-.sort({createdAt:-1});
+    const reports = await ReportUser.find()
+      .populate("reportedBy", "legalName phone email")
+      .populate("reportedUser", "legalName phone email primaryProfilePhoto isActive")
+      .sort({ createdAt: -1 });
 
-let data=reports;
+    let data = reports;
 
-if(search){
+    if (search) {
 
-const s=search.toLowerCase();
+      const s = search.toLowerCase();
 
-data=data.filter(item=>
-item.reportedUser?.legalName?.toLowerCase().includes(s) ||
-item.reportedUser?.phone?.includes(search) ||
-item.reportedUser?.email?.toLowerCase().includes(s)
-);
+      data = data.filter(item =>
+        item.reportedUser?.legalName?.toLowerCase().includes(s) ||
+        item.reportedUser?.phone?.includes(search) ||
+        item.reportedUser?.email?.toLowerCase().includes(s)
+      );
 
-}
+    }
 
-const total=data.length;
+    const total = data.length;
 
-const result=data.slice(
-(page-1)*limit,
-page*limit
-);
+    const result = data.slice(
+      (page - 1) * limit,
+      page * limit
+    );
 
-return res.json({
-success:true,
-total,
-page:Number(page),
-totalPages:Math.ceil(total/limit),
-count:result.length,
-data:result
-});
+    return res.json({
+      success: true,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / limit),
+      count: result.length,
+      data: result
+    });
 
-}catch(error){
-return res.status(500).json({
-success:false,
-message:error.message
-});
-}
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 
-exports.getReportedUserDetails=async(req,res)=>{
+exports.getReportedUserDetails = async (req, res) => {
 
-try{
+  try {
 
-const reports=await ReportUser.find({
-reportedUser:req.params.userId
-})
-.populate("reportedBy","legalName phone email")
-.sort({createdAt:-1});
+    const reports = await ReportUser.find({
+      reportedUser: req.params.userId
+    })
+      .populate("reportedBy", "legalName phone email")
+      .sort({ createdAt: -1 });
 
-return res.json({
-success:true,
-reportCount:reports.length,
-data:reports
-});
+    return res.json({
+      success: true,
+      reportCount: reports.length,
+      data: reports
+    });
 
-}catch(error){
+  } catch (error) {
 
-return res.status(500).json({
-success:false,
-message:error.message
-});
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
 
-}
-
-};
-
-exports.getUserBlockedList=async(req,res)=>{
-
-try{
-
-const data=await BlockUser.find({
-blockedBy:req.params.userId
-})
-.populate(
-"blockedUser",
-"legalName phone email primaryProfilePhoto"
-)
-.sort({createdAt:-1});
-
-return res.json({
-success:true,
-count:data.length,
-data
-});
-
-}catch(error){
-
-return res.status(500).json({
-success:false,
-message:error.message
-});
-
-}
+  }
 
 };
 
+exports.getUserBlockedList = async (req, res) => {
 
-exports.removeBlockedUser=async(req,res)=>{
+  try {
 
-try{
+    const data = await BlockUser.find({
+      blockedBy: req.params.userId
+    })
+      .populate(
+        "blockedUser",
+        "legalName phone email primaryProfilePhoto"
+      )
+      .sort({ createdAt: -1 });
 
-const block=await BlockUser.findByIdAndDelete(
-req.params.blockId
-);
+    return res.json({
+      success: true,
+      count: data.length,
+      data
+    });
 
-if(!block){
+  } catch (error) {
 
-return res.status(404).json({
-success:false,
-message:"Block not found"
-});
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
 
-}
-
-return res.json({
-success:true,
-message:"Block removed successfully"
-});
-
-}catch(error){
-
-return res.status(500).json({
-success:false,
-message:error.message
-});
-
-}
+  }
 
 };
 
-exports.getModerationDashboard=async(req,res)=>{
 
-try{
+exports.removeBlockedUser = async (req, res) => {
 
-const today=new Date();
+  try {
 
-today.setHours(0,0,0,0);
+    const block = await BlockUser.findByIdAndDelete(
+      req.params.blockId
+    );
 
-const [
-totalUsers,
-activeUsers,
-inactiveUsers,
-blockedRelations,
-reportedProfiles,
-todayBlocks,
-todayReports,
-autoSuspendedUsers
-]=await Promise.all([
+    if (!block) {
 
-User.countDocuments(),
+      return res.status(404).json({
+        success: false,
+        message: "Block not found"
+      });
 
-User.countDocuments({
-isActive:true
-}),
+    }
 
-User.countDocuments({
-isActive:false
-}),
+    return res.json({
+      success: true,
+      message: "Block removed successfully"
+    });
 
-BlockUser.countDocuments(),
+  } catch (error) {
 
-ReportUser.countDocuments(),
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
 
-BlockUser.countDocuments({
-createdAt:{$gte:today}
-}),
+  }
 
-ReportUser.countDocuments({
-createdAt:{$gte:today}
-}),
+};
 
-User.countDocuments({
-isActive:false,
-reportCount:{
-$gte:100
-}
-})
+exports.getModerationDashboard = async (req, res) => {
 
-]);
+  try {
 
-return res.json({
+    const today = new Date();
 
-success:true,
+    today.setHours(0, 0, 0, 0);
 
-data:{
+    const [
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      blockedRelations,
+      reportedProfiles,
+      todayBlocks,
+      todayReports,
+      autoSuspendedUsers
+    ] = await Promise.all([
 
-totalUsers,
-activeUsers,
-inactiveUsers,
-blockedRelations,
-reportedProfiles,
-todayBlocks,
-todayReports,
-autoSuspendedUsers
+      User.countDocuments(),
 
-}
+      User.countDocuments({
+        isActive: true
+      }),
 
-});
+      User.countDocuments({
+        isActive: false
+      }),
 
-}catch(error){
+      BlockUser.countDocuments(),
 
-return res.status(500).json({
+      ReportUser.countDocuments(),
 
-success:false,
-message:error.message
+      BlockUser.countDocuments({
+        createdAt: { $gte: today }
+      }),
 
-});
+      ReportUser.countDocuments({
+        createdAt: { $gte: today }
+      }),
 
-}
+      User.countDocuments({
+        isActive: false,
+        reportCount: {
+          $gte: 100
+        }
+      })
+
+    ]);
+
+    return res.json({
+
+      success: true,
+
+      data: {
+
+        totalUsers,
+        activeUsers,
+        inactiveUsers,
+        blockedRelations,
+        reportedProfiles,
+        todayBlocks,
+        todayReports,
+        autoSuspendedUsers
+
+      }
+
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+
+      success: false,
+      message: error.message
+
+    });
+
+  }
 
 };
 
@@ -802,6 +804,86 @@ exports.getDeactivatedUsers = async (req, res) => {
     });
 
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.createUserFromAdmin = async (req, res) => {
+  try {
+    const { createdFor, legalName, phone, password, email, gender } = req.body;
+
+    if (!createdFor || !legalName || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: createdFor, legalName, phone, password"
+      });
+    }
+
+    const allowedCreatedFor = ["Self", "Son", "Daughter", "Brother", "Sister", "Friend", "Relative"];
+    if (!allowedCreatedFor.includes(createdFor)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid createdFor value. Must be one of: ${allowedCreatedFor.join(", ")}`
+      });
+    }
+
+    const phoneExists = await User.findOne({ phone: phone.trim() });
+    if (phoneExists) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number already registered"
+      });
+    }
+
+    if (email && email.trim() !== "") {
+      const emailExists = await User.findOne({ email: email.trim().toLowerCase() });
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Email address already registered"
+        });
+      }
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const userData = {
+      createdFor,
+      legalName: legalName.trim(),
+      phone: phone.trim(),
+      password: hashPassword,
+      isActive: true,
+      freeUsedCount: 0,
+      maxFreeLimit: 5
+    };
+
+    if (email && email.trim() !== "") {
+      userData.email = email.trim().toLowerCase();
+    }
+
+    if (gender && gender.trim() !== "") {
+      userData.gender = gender.trim();
+    }
+
+    const user = new User(userData);
+
+    user.profileCompletionPercentage = calculateProfileCompletion(user);
+
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(201).json({
+      success: true,
+      message: "User account created successfully by admin",
+      data: userObj
+    });
+  } catch (error) {
+    console.error("ADMIN CREATE USER ERROR =>", error);
     return res.status(500).json({
       success: false,
       message: error.message
