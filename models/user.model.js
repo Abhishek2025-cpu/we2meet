@@ -56,11 +56,11 @@ const UserSchema = new mongoose.Schema(
     height: String,
     weight: String,
 
-     zodiacSign: String,
+    zodiacSign: String,
 
-      rasi: String,
+    rasi: String,
 
-     dosa: String,
+    dosa: String,
     location: String,
     maritalStatus: String,
     highestQualification: String,
@@ -100,50 +100,50 @@ const UserSchema = new mongoose.Schema(
       aboutFamily: String
     },
 
-   partnerPreference: {
-  ageRange: {
-    min: Number,
-    max: Number
-  },
+    partnerPreference: {
+      ageRange: {
+        min: Number,
+        max: Number
+      },
 
-  heightRange: {
-    min: Number,
-    max: Number
-  },
+      heightRange: {
+        min: Number,
+        max: Number
+      },
 
-  maritalStatus: [String],
+      maritalStatus: [String],
 
-  religions: [String],
+      religions: [String],
 
-  motherTongues: [String],
+      motherTongues: [String],
 
-  castes: [String],
+      castes: [String],
 
-  qualifications: [String],
+      qualifications: [String],
 
-  workingWith: [String],
+      workingWith: [String],
 
-  professions: [String],
+      professions: [String],
 
-  // NEW
-  locations: [String],
+      // NEW
+      locations: [String],
 
-  annualIncomeMin: Number,
-  annualIncomeMax: Number,
+      annualIncomeMin: Number,
+      annualIncomeMax: Number,
 
-  dietaryPreference: [String],
+      dietaryPreference: [String],
 
-  smoking: Boolean,
-  drinking: Boolean,
+      smoking: Boolean,
+      drinking: Boolean,
 
-  familyStatus: [String],
-  familyType: [String],
-  familyValues: [String],
+      familyStatus: [String],
+      familyType: [String],
+      familyValues: [String],
 
-  manglik: Boolean,
+      manglik: Boolean,
 
-  gender: String
-},
+      gender: String
+    },
 
     lifeStyleDetails: {
       dietaryPreference: [String],
@@ -157,7 +157,7 @@ const UserSchema = new mongoose.Schema(
       values: [String],
       lifeGoal: String
     },
-    
+
     fcmTokens: [
       {
         type: String
@@ -169,6 +169,7 @@ const UserSchema = new mongoose.Schema(
       pob: String,
       gotra: String,
       manglik: Boolean,
+      timeOfBirth: String,
       kundaliPhotos: [
         {
           type: String
@@ -190,7 +191,7 @@ const UserSchema = new mongoose.Schema(
       gotra: String,
       manglik: String
     },
-    
+
     primaryProfilePhoto: {
       type: String,
       default: null
@@ -213,16 +214,16 @@ const UserSchema = new mongoose.Schema(
     },
 
     photoVisibility: {
-  type: String,
-  enum: ["public", "private"],
-  default: "public"
-},
+      type: String,
+      enum: ["public", "private"],
+      default: "public"
+    },
 
-contactVisibility: {
-  type: String,
-  enum: ["public", "private"],
-  default: "public"
-},
+    contactVisibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "public"
+    },
 
 
 
