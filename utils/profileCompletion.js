@@ -60,7 +60,7 @@ const calculateProfileCompletion = (user) => {
   check(!!(user.horoscope?.gotra || user.kundaliDetails?.gotra));
   check(!!(user.horoscope?.manglik !== undefined && user.horoscope?.manglik !== '' || user.kundaliDetails?.manglik !== undefined));
   check(!!(user.horoscope?.cityOfBirth || user.kundaliDetails?.pob));
-  check(!!(user.horoscope?.timeOfBirth));
+  check(!!(user.horoscope?.timeOfBirth || user.kundaliDetails?.timeOfBirth));
 
   // ── Partner Preferences (weight: 2) ──────────────────────────────────────
   check(!!(user.partnerPreference?.ageRange?.min && user.partnerPreference?.ageRange?.max), 2);

@@ -122,7 +122,7 @@ exports.getIncomingRequests =
         })
           .populate(
             "requestedBy",
-            "legalName primaryProfilePhoto photoVisibility age location"
+            "legalName primaryProfilePhoto photoVisibility dob height profession workingWith"
           )
           .sort({
             createdAt: -1
@@ -165,7 +165,7 @@ exports.getMyRequests =
         })
           .populate(
             "requestedTo",
-            "legalName primaryProfilePhoto photoVisibility"
+            "legalName primaryProfilePhoto photoVisibility dob height profession workingWith"
           )
           .sort({
             createdAt: -1
