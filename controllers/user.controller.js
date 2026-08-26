@@ -823,7 +823,12 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     if (user.email) {
-      await sendOtpEmail(user.email, otp);
+      try {
+        await sendOtpEmail(user.email, otp);
+      } catch (emailErr) {
+        console.log("Email sending error:", emailErr.message);
+        console.log("OTP delivery failed, test OTP code:", otp);
+      }
     }
 
     return res.status(200).json({
