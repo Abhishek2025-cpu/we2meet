@@ -34,6 +34,8 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    resetPasswordOTP: String,
+    resetPasswordExpires: Date,
 
     gender: String,
     dob: Date,

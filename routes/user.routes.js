@@ -8,6 +8,9 @@ const protect = require("../middleware/auth.middleware");
 const {
   createUser,
   login,
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
   updateUser,
   getAllUsers,
   getUserById,
@@ -21,10 +24,6 @@ const {
   toggleContactVisibility,
   getContactVisibility
 } = require("../controllers/user.controller");
-
-// ==========================
-// Public Routes
-// ==========================
 
 router.post(
   "/register",
@@ -46,6 +45,9 @@ router.post(
 );
 
 router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-otp", verifyForgotPasswordOTP);
+router.post("/reset-password", resetPassword);
 
 // ==========================
 // Protected Routes

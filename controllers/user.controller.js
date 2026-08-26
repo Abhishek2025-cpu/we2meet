@@ -1,10 +1,12 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const calculateProfileCompletion = require("../utils/profileCompletion");
 const calculateMatchPercentage = require("../utils/matchPercentage");
 const { generateToken } = require("../utils/jwt");
 const { sendNotification } = require("../services/notification.service");
+const { sendOtpEmail } = require("../services/email.service");
 const BlockedUser = require("../models/blockUser.model");
 const PhotoAccessRequest = require("../models/photoAccessRequest.model");
 
@@ -791,3 +793,144 @@ exports.getContactVisibility = async (req, res) => {
 
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { identifier } = req.body;
+    if (!identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or phone number is required"
+      });
+    }
+
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }]
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email or phone number"
+      });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    user.resetPasswordOTP = hashedOtp;
+    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    if (user.email) {
+      await sendOtpEmail(user.email, otp);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to your registered email/phone"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.verifyForgotPasswordOTP = async (req, res) => {
+  try {
+    const { identifier, otp } = req.body;
+    if (!identifier || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier and OTP are required"
+      });
+    }
+
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }]
+    });
+
+    if (!user || !user.resetPasswordOTP || !user.resetPasswordExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP"
+      });
+    }
+
+    if (Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one."
+      });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+    if (hashedOtp !== user.resetPasswordOTP) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP code"
+      });
+    }
+
+    const resetToken = generateToken(user._id);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      resetToken
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { identifier, resetToken, newPassword } = req.body;
+    if (!identifier || !resetToken || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long"
+      });
+    }
+
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }]
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashPassword;
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully. Please login with your new password."
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

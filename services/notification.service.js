@@ -20,7 +20,6 @@ const sendNotification = async ({
     });
 
     if (tokens.length === 0) {
-
       return;
     }
 
@@ -39,18 +38,14 @@ const sendNotification = async ({
       )
     };
 
-    console.log(`Sending payload via FCM...`);
     const response = await getMessaging().sendEachForMulticast(payload);
 
-    console.log(`FCM Multicast Response:`);
-    console.log(`  Success Count: ${response.successCount}`);
-    console.log(`  Failure Count: ${response.failureCount}`);
+
 
     if (response.failureCount > 0) {
       const tokensToRemove = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
-          console.log(`  ❌ Failed Token [Index: ${idx}] error code: ${resp.error.code}, message: ${resp.error.message}`);
 
           const error = resp.error;
           if (
@@ -78,7 +73,6 @@ const sendNotification = async ({
       "❌ Notification Try-Catch Error:",
       error.stack || error.message
     );
-    console.log(`--- [sendNotification End] ---\n`);
   }
 };
 
