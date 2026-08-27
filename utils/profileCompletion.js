@@ -1,4 +1,5 @@
 const calculateProfileCompletion = (user) => {
+  if (!user) return 0;
   let filled = 0;
   let total = 0;
 
@@ -8,7 +9,7 @@ const calculateProfileCompletion = (user) => {
   };
 
   // ── Basic Info (weight: 1 each = 9 points) ────────────────────────────────
-  check(!!user.createdFor);
+  check(!!(user.createdFor || user.profileFor));
   check(!!(user.fullName || user.legalName));
   check(!!user.email);
   check(!!user.phone);
@@ -19,7 +20,7 @@ const calculateProfileCompletion = (user) => {
   check(!!user.maritalStatus);
 
   // ── Location & Identity (weight: 1 each) ──────────────────────────────────
-  check(!!user.location);
+  check(!!(user.location || user.country || user.horoscope?.cityOfBirth || user.kundaliDetails?.pob));
   check(!!user.country);
   check(!!user.height);
 
@@ -28,10 +29,10 @@ const calculateProfileCompletion = (user) => {
   check(!!user.college);
   check(!!user.workingWith);
   check(!!user.profession);
-  check(!!user.annualIncome);
+  check(user.annualIncome !== undefined && user.annualIncome !== null && user.annualIncome !== '');
 
   // ── Profile Photo (weight: 2) ──────────────────────────────────────────────
-  check(!!(user.primaryProfilePhoto || (user.profilePhotos && user.profilePhotos.length > 0)), 2);
+  check(!!(user.primaryProfilePhoto || (user.profilePhotos && user.profilePhotos.length > 0) || (user.photos && user.photos.length > 0) || user.profilePhoto || user.profileImage), 2);
 
   // ── Family Details (weight: 1 each) ───────────────────────────────────────
   // Support both new flat fields and old nested familyDetails
@@ -46,27 +47,27 @@ const calculateProfileCompletion = (user) => {
   // Support both new flat fields and old nested myStory
   check(!!(user.aboutMe || user.myStory?.aboutMe));
   check(!!(user.lifeGoals || user.myStory?.lifeGoal));
-  check(!!(user.hobbies?.length || user.lifeStyleDetails?.interestAndHobbies?.length));
+  check(!!(user.hobbies?.length || user.lifeStyleDetails?.interestAndHobbies?.length || user.lifestyle?.interests?.length));
   check(!!(user.values?.length || user.myStory?.values?.length));
 
   // ── Lifestyle (weight: 1 each) ────────────────────────────────────────────
   // Support both new flat lifestyle and old lifeStyleDetails
   check(!!(user.lifestyle?.diet || user.lifeStyleDetails?.dietaryPreference?.length));
-  check(user.lifestyle?.smoking !== undefined && user.lifestyle?.smoking !== '' || user.lifeStyleDetails?.smoking !== undefined);
-  check(user.lifestyle?.drinking !== undefined && user.lifestyle?.drinking !== '' || user.lifeStyleDetails?.drinking !== undefined);
+  check((user.lifestyle?.smoking !== undefined && user.lifestyle?.smoking !== '') || (user.lifeStyleDetails?.smoking !== undefined && user.lifeStyleDetails?.smoking !== null));
+  check((user.lifestyle?.drinking !== undefined && user.lifestyle?.drinking !== '') || (user.lifeStyleDetails?.drinking !== undefined && user.lifeStyleDetails?.drinking !== null));
 
   // ── Horoscope / Kundali (weight: 1 each) ─────────────────────────────────
   // Support both new flat horoscope and old kundaliDetails
   check(!!(user.horoscope?.gotra || user.kundaliDetails?.gotra));
-  check(!!(user.horoscope?.manglik !== undefined && user.horoscope?.manglik !== '' || user.kundaliDetails?.manglik !== undefined));
+  check(!!(user.horoscope?.manglik !== undefined && user.horoscope?.manglik !== '' || user.kundaliDetails?.manglik !== undefined && user.kundaliDetails?.manglik !== null));
   check(!!(user.horoscope?.cityOfBirth || user.kundaliDetails?.pob));
   check(!!(user.horoscope?.timeOfBirth || user.kundaliDetails?.timeOfBirth));
 
   // ── Partner Preferences (weight: 2) ──────────────────────────────────────
   check(!!(user.partnerPreference?.ageRange?.min && user.partnerPreference?.ageRange?.max), 2);
-  check(!!(user.partnerPreference?.maritalStatus?.length || user.partnerPreference?.religions?.length), 2);
+  check(!!(user.partnerPreference?.maritalStatus?.length || user.partnerPreference?.religions?.length || user.partnerPreference?.religion?.length), 2);
 
-  return Math.min(Math.round((filled / total) * 100), 100);
+  return total > 0 ? Math.min(Math.round((filled / total) * 100), 100) : 0;
 };
 
 module.exports = calculateProfileCompletion;

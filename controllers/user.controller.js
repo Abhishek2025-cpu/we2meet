@@ -371,7 +371,11 @@ exports.updateUser = async (req, res) => {
       ];
     }
 
+    if (user.createdFor && !user.profileFor) user.profileFor = user.createdFor;
+    if (user.profileFor && !user.createdFor) user.createdFor = user.profileFor;
+
     user.profileCompletionPercentage = calculateProfileCompletion(user);
+    user.profileCompleted = user.profileCompletionPercentage >= 100;
     await user.save();
 
     const userObj = user.toObject();
