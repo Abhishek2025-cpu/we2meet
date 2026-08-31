@@ -137,7 +137,7 @@ dosa,
       primaryProfilePhoto,
       profilePhotos,
       freeUsedCount: 0,
-      maxFreeLimit: 5,
+      maxFreeLimit: 9999, // TODO: Revert to 5 when payment is live
       fcmTokens: fcmToken ? [fcmToken] : []
     });
 

@@ -857,7 +857,7 @@ exports.createUserFromAdmin = async (req, res) => {
       password: hashPassword,
       isActive: true,
       freeUsedCount: 0,
-      maxFreeLimit: 5
+      maxFreeLimit: 9999 // TODO: Revert to 5 when payment is live
     };
 
     if (email && email.trim() !== "") {

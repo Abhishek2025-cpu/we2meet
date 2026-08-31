@@ -229,9 +229,10 @@ const UserSchema = new mongoose.Schema(
 
 
 
+    // TODO: Revert to 5 (or desired limit) when payment integration is live
     maxFreeLimit: {
       type: Number,
-      default: 5
+      default: 9999
     }
   },
 
