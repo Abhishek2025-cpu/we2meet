@@ -40,6 +40,20 @@ const {
   "../controllers/adminAnalytics.controller"
 );
 
+const {
+  getSpamStats,
+  getSpamList,
+  updateSpamStatus
+} = require("../controllers/spam.controller");
+
+const {
+  getAllBannersAdmin,
+  getBannerStats,
+  createBanner,
+  updateBanner,
+  deleteBanner
+} = require("../controllers/banner.controller");
+
 router.post(
   "/create",
   createAdmin
@@ -164,12 +178,53 @@ router.delete(
   removeBlockedUser
 );
 
+router.get(
+  "/spam/stats",
+  adminProtect,
+  getSpamStats
+);
 
+router.get(
+  "/spam/list",
+  adminProtect,
+  getSpamList
+);
 
+router.patch(
+  "/spam/:id/status",
+  adminProtect,
+  updateSpamStatus
+);
 
+router.get(
+  "/banners",
+  adminProtect,
+  getAllBannersAdmin
+);
 
+router.get(
+  "/banners/stats",
+  adminProtect,
+  getBannerStats
+);
 
+router.post(
+  "/banners",
+  adminProtect,
+  createBanner
+);
 
+router.put(
+  "/banners/:id",
+  adminProtect,
+  updateBanner
+);
+
+router.delete(
+  "/banners/:id",
+  adminProtect,
+  deleteBanner
+);
 
 router.get(
   "/interest-analytics",

@@ -29,6 +29,12 @@ const reportUserSchema = new mongoose.Schema(
       required: true
     },
 
+    status: {
+      type: String,
+      enum: ["pending", "reviewed", "resolved", "dismissed"],
+      default: "pending"
+    },
+
     remarks: {
       type: String,
       default: ""
