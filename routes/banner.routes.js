@@ -5,6 +5,7 @@ const {
   getPublicBanners
 } = require("../controllers/banner.controller");
 
+router.get("/", getPublicBanners);
 router.get("/all", getPublicBanners);
 
 module.exports = router;
