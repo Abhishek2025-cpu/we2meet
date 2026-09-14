@@ -46,8 +46,11 @@ const {
   updateSpamStatus
 } = require("../controllers/spam.controller");
 
+const upload = require("../middleware/upload.middleware");
+
 const {
   getAllBannersAdmin,
+  getBannerByIdAdmin,
   getBannerStats,
   createBanner,
   updateBanner,
@@ -208,15 +211,30 @@ router.get(
   getBannerStats
 );
 
+router.get(
+  "/banners/:id",
+  adminProtect,
+  getBannerByIdAdmin
+);
+
 router.post(
   "/banners",
   adminProtect,
+  upload.single("image"),
   createBanner
 );
 
 router.put(
   "/banners/:id",
   adminProtect,
+  upload.single("image"),
+  updateBanner
+);
+
+router.patch(
+  "/banners/:id",
+  adminProtect,
+  upload.single("image"),
   updateBanner
 );
 

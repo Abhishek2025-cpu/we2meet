@@ -143,7 +143,14 @@ app.get("/", (req, res) => {
   });
 });
 
-
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("GLOBAL SERVER ERROR =>", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 

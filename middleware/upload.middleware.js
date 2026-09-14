@@ -7,10 +7,6 @@ const cloudinary = require(
   "../config/cloudinary"
 );
 
-console.log("Cloudinary from middleware =>");
-console.log(cloudinary);
-console.log("Uploader =>", cloudinary?.uploader);
-
 const storage =
   new CloudinaryStorage({
     cloudinary,
@@ -20,12 +16,25 @@ const storage =
     ) => {
       let folder = "we2meet/profile";
 
-      if (
-        file.fieldname ===
-        "kundaliPhoto"
+      if (file.fieldname === "kundaliPhoto") {
+        folder = "we2meet/kundali";
+      } else if (
+        req.baseUrl?.includes("banner") ||
+        req.originalUrl?.includes("banner") ||
+        file.fieldname === "banner" ||
+        file.fieldname === "bannerImage"
       ) {
-        folder =
-          "we2meet/kundali";
+        folder = "we2meet/banners";
+      } else if (
+        req.baseUrl?.includes("success-stories") ||
+        req.originalUrl?.includes("success-stories")
+      ) {
+        folder = "we2meet/success-stories";
+      } else if (
+        req.baseUrl?.includes("admin-notifications") ||
+        req.originalUrl?.includes("admin-notifications")
+      ) {
+        folder = "we2meet/notifications";
       }
 
       return {
