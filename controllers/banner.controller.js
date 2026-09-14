@@ -187,10 +187,10 @@ exports.createBanner = async (req, res) => {
       isActive,
       startDate,
       endDate
-    } = req.body;
+    } = req.body || {};
 
     // Image URL can come from Cloudinary multer file or direct URL in body
-    const imageUrl = req.file ? req.file.path : req.body.imageUrl;
+    const imageUrl = req.file ? req.file.path : req.body?.imageUrl;
 
     if (!title || !title.trim()) {
       return res.status(400).json({
@@ -260,7 +260,7 @@ exports.updateBanner = async (req, res) => {
       isActive,
       startDate,
       endDate
-    } = req.body;
+    } = req.body || {};
 
     // If new image file is uploaded via multer
     if (req.file) {
