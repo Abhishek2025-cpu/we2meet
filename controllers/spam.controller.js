@@ -130,3 +130,29 @@ exports.updateSpamStatus = async (req, res) => {
     });
   }
 };
+
+exports.deleteSpamReport = async (req, res) => {
+  try {
+    const report = await ReportUser.findOneAndDelete({
+      _id: req.params.id,
+      reason: "Spam"
+    });
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Spam report not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Spam report deleted successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

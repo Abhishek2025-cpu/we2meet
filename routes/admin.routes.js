@@ -43,8 +43,14 @@ const {
 const {
   getSpamStats,
   getSpamList,
-  updateSpamStatus
+  updateSpamStatus,
+  deleteSpamReport
 } = require("../controllers/spam.controller");
+
+const {
+  getAdminFavorites,
+  deleteAdminFavorite
+} = require("../controllers/adminInteraction.controller");
 
 const upload = require("../middleware/upload.middleware");
 
@@ -197,6 +203,24 @@ router.patch(
   "/spam/:id/status",
   adminProtect,
   updateSpamStatus
+);
+
+router.delete(
+  "/spam/delete/:id",
+  adminProtect,
+  deleteSpamReport
+);
+
+router.get(
+  "/interactions/favorites",
+  adminProtect,
+  getAdminFavorites
+);
+
+router.delete(
+  "/interactions/favorites/:id",
+  adminProtect,
+  deleteAdminFavorite
 );
 
 router.get(
